@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:progress_pals/widgets/widgets.dart';
 
 void main() {
   runApp(const MyApp());

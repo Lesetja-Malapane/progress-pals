@@ -1,4 +1,4 @@
-package com.example.progress_pals
+package com.progress_pals
 
 import io.flutter.embedding.android.FlutterActivity
 
