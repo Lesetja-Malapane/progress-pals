@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "287050867924",
+    "project_id": "progresspals-319ac",
+    "storage_bucket": "progresspals-319ac.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:287050867924:android:a630e14083eeea591b0741",
+        "android_client_info": {
+          "package_name": "com.progress_pals"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkdvZVcka7hRnkkufMnDLWq8PUASlybs0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
