@@ -30,9 +30,18 @@ class DatabaseService implements AppDatabase {
   }
 
   @override
-  Future<void> createHabit(Habit habit) {
+  Future<void> createHabit(Habit habit) async {
     // TODO: implement createHabit
-    throw UnimplementedError();
+    // throw UnimplementedError();
+
+    await _database?.transaction((txn) async {
+      int id = await txn.rawInsert(
+        'INSERT INTO habits(id, name, description, targetPerWeek, completedDates) VALUES(?, ?, ?, ?, ?)',
+        [habit.id, habit.name, habit.description, habit.targetPerWeek, habit.completionDates.map((e) => e.toIso8601String()).join(',')],
+      );
+      print('inserted habit: $id');
+    });
+    return Future.value();
   }
 
   @override
