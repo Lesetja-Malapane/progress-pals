@@ -5,9 +5,8 @@ class HabitModel extends Habit {
     required super.id,
     required super.name,
     super.description,
-    super.streak,
-    required super.lastCompletionDate,
-    required super.creationDate,
+    super.targetPerWeek,
+    required super.completionDates,
     super.isCompleted,
   });
 
@@ -16,9 +15,12 @@ class HabitModel extends Habit {
       id: json['id'],
       name: json['name'],
       description: json['description'],
-      streak: json['streak'],
-      lastCompletionDate: DateTime.parse(json['lastCompletionDate']),
-      creationDate: DateTime.parse(json['creationDate']),
+      targetPerWeek: json['targetPerWeek'],
+      completionDates: List<DateTime>.from(
+        json['completionDates'].map(
+          (date) => DateTime.parse(date),
+        ),
+      ),
       isCompleted: json['isCompleted'],
     );
   }
@@ -28,11 +30,9 @@ class HabitModel extends Habit {
       'id': id,
       'name': name,
       'description': description,
-      'streak': streak,
-      'lastCompletionDate': lastCompletionDate.toIso8601String(),
-      'creationDate': creationDate.toIso8601String(),
+      'targetPerWeek': targetPerWeek,
+      'completionDates': completionDates.map((date) => date.toIso8601String()).toList(),
       'isCompleted': isCompleted,
     };
   }
-
 }
