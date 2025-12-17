@@ -16,12 +16,9 @@
 //   Future<void> createHabit(Habit habit) async {
 //     final model = habit is HabitModel
 //         ? habit
-//         : HabitModel(
-//             id: habit.id,
-//             title: habit.title,
-//             targetPerWeek: habit.targetPerWeek,
-//             completedDates: habit.completedDates,
-//           );
+//         : HabitModel(id: habit.id, name: habit.name, description: habit.description, targetPerWeek: habit.targetPerWeek, completionDates: []
+          
+//         );
 
 //     await saveToFirebase(model.toJson());
 //   }
