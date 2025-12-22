@@ -31,9 +31,6 @@ class DatabaseService implements AppDatabase {
 
   @override
   Future<void> createHabit(Habit habit) async {
-    // TODO: implement createHabit
-    // throw UnimplementedError();
-
     await _database?.transaction((txn) async {
       int id = await txn.rawInsert(
         'INSERT INTO habits(id, name, description, targetPerWeek, completedDates) VALUES(?, ?, ?, ?, ?)',
@@ -46,8 +43,28 @@ class DatabaseService implements AppDatabase {
 
   @override
   Future<List<Habit>> getHabits() {
-    // TODO: implement getHabits
-    throw UnimplementedError();
+    return _database!.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('habits');
+      return List.generate(maps.length, (i) {
+        return Habit(
+          id: maps[i]['id'],
+          name: maps[i]['name'],
+          description: maps[i]['description'],
+          targetPerWeek: maps[i]['targetPerWeek'],
+          completionDates: maps[i]['completedDates']
+              .split(',')
+              .map((e) => DateTime.parse(e))
+              .toList(),
+        );
+      });
+    });
+  }
+
+  @override
+  Future<void> updateHabit(Habit habit) {
+    return _database!.transaction((txn) async {
+      Future<int> Function(String sql, [List<Object?>? arguments]) id = await txn.rawUpdate;
+    });
   }
 
   @override
@@ -61,5 +78,12 @@ class DatabaseService implements AppDatabase {
       },
     );
     return Future.value(database);
+  }
+  
+  @override
+  Future<void> deleteHabit(String id) {
+    return _database!.transaction((txn) async {
+      await txn.rawDelete('DELETE FROM habits WHERE id = ?', [id]);
+    });
   }
 }
