@@ -74,11 +74,9 @@ class DatabaseService implements AppDatabase {
   }
 
   @override
-  Future<void> updateHabit(Habit habit) {
-    // TODO: implement updateHabit
-    // throw UnimplementedError();
+  Future<void> updateHabit(Habit habit) async {
     return _database!.transaction((txn) async {
-      Future<int> Function(String sql, [List<Object?>? arguments]) id = await txn.rawUpdate;
+      Future<int> Function(String sql, [List<Object?>? arguments]) id =  txn.rawUpdate;
     });
   }
 
