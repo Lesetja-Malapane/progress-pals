@@ -1,6 +1,8 @@
+import 'package:logger/web.dart';
 import 'package:progress_pals/features/habits/domain/entities/habit.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:sqflite/sqlite_api.dart';
+
+var logger = Logger();
 
 abstract class AppDatabase {
   Future<Database> initDatabase();
@@ -8,6 +10,8 @@ abstract class AppDatabase {
   Future<void> clearDatabase();
   Future<List<Habit>> getHabits();
   Future<void> createHabit(Habit habit);
+  Future<void> updateHabit(Habit habit);
+  Future<void> deleteHabit(String id);
 }
 
 class DatabaseService implements AppDatabase {
@@ -34,9 +38,15 @@ class DatabaseService implements AppDatabase {
     await _database?.transaction((txn) async {
       int id = await txn.rawInsert(
         'INSERT INTO habits(id, name, description, targetPerWeek, completedDates) VALUES(?, ?, ?, ?, ?)',
-        [habit.id, habit.name, habit.description, habit.targetPerWeek, habit.completionDates.map((e) => e.toIso8601String()).join(',')],
+        [
+          habit.id,
+          habit.name,
+          habit.description,
+          habit.targetPerWeek,
+          habit.completionDates.map((e) => e.toIso8601String()).join(','),
+        ],
       );
-      print('inserted habit: $id');
+      logger.d('inserted habit: $id');
     });
     return Future.value();
   }
@@ -61,9 +71,18 @@ class DatabaseService implements AppDatabase {
   }
 
   @override
-  Future<void> updateHabit(Habit habit) {
-    return _database!.transaction((txn) async {
-      Future<int> Function(String sql, [List<Object?>? arguments]) id = await txn.rawUpdate;
+  Future<void> updateHabit(Habit habit) async {
+    await _database?.transaction((txn) async {
+      await txn.rawUpdate(
+        'UPDATE habits SET name = ?, description = ?, targetPerWeek = ?, completedDates = ? WHERE id = ?',
+        [
+          habit.name,
+          habit.description,
+          habit.targetPerWeek,
+          habit.completionDates.map((e) => e.toIso8601String()).join(','),
+          habit.id,
+        ],
+      );
     });
   }
 
@@ -73,7 +92,7 @@ class DatabaseService implements AppDatabase {
       'habits.db',
       onCreate: (db, version) {
         db.execute(
-          'CREATE TABLE IF NOT EXIST habits (id INTEGER PRIMARY KEY, name TEXT, description TEXT, targetPerWeek INTEGER, completedDates TEXT)',
+          'CREATE TABLE IF NOT EXISTS habits (id INTEGER PRIMARY KEY, name TEXT, description TEXT, targetPerWeek INTEGER, completedDates TEXT)',
         );
       },
     );
