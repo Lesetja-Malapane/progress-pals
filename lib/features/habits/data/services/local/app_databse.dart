@@ -8,6 +8,8 @@ abstract class AppDatabase {
   Future<void> clearDatabase();
   Future<List<Habit>> getHabits();
   Future<void> createHabit(Habit habit);
+  Future<void> updateHabit(Habit habit);
+  Future<void> deleteHabit(String id);
 }
 
 class DatabaseService implements AppDatabase {
@@ -37,7 +39,13 @@ class DatabaseService implements AppDatabase {
     await _database?.transaction((txn) async {
       int id = await txn.rawInsert(
         'INSERT INTO habits(id, name, description, targetPerWeek, completedDates) VALUES(?, ?, ?, ?, ?)',
-        [habit.id, habit.name, habit.description, habit.targetPerWeek, habit.completionDates.map((e) => e.toIso8601String()).join(',')],
+        [
+          habit.id,
+          habit.name,
+          habit.description,
+          habit.targetPerWeek,
+          habit.completionDates.map((e) => e.toIso8601String()).join(','),
+        ],
       );
       print('inserted habit: $id');
     });
@@ -47,7 +55,31 @@ class DatabaseService implements AppDatabase {
   @override
   Future<List<Habit>> getHabits() {
     // TODO: implement getHabits
-    throw UnimplementedError();
+    // throw UnimplementedError();
+    return _database!.transaction((txn) async {
+      final List<Map<String, dynamic>> maps = await txn.query('habits');
+      return List.generate(maps.length, (i) {
+        return Habit(
+          id: maps[i]['id'],
+          name: maps[i]['name'],
+          description: maps[i]['description'],
+          targetPerWeek: maps[i]['targetPerWeek'],
+          completionDates: maps[i]['completedDates']
+              .split(',')
+              .map((e) => DateTime.parse(e))
+              .toList(),
+        );
+      });
+    });
+  }
+
+  @override
+  Future<void> updateHabit(Habit habit) {
+    // TODO: implement updateHabit
+    // throw UnimplementedError();
+    return _database!.transaction((txn) async {
+      Future<int> Function(String sql, [List<Object?>? arguments]) id = await txn.rawUpdate;
+    });
   }
 
   @override
@@ -61,5 +93,14 @@ class DatabaseService implements AppDatabase {
       },
     );
     return Future.value(database);
+  }
+  
+  @override
+  Future<void> deleteHabit(String id) {
+    // TODO: implement deleteHabit
+    // throw UnimplementedError();
+    return _database!.transaction((txn) async {
+      await txn.rawDelete('DELETE FROM habits WHERE id = ?', [id]);
+    });
   }
 }
