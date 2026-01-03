@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:progress_pals/features/auth/presentation/pages/welcome_page.dart';
 import 'package:progress_pals/firebase_options.dart';
 
 void main() async {
@@ -25,7 +26,7 @@ class MyApp extends StatelessWidget {
       ),
       // home: const MyHomePage(title: 'Progress Pals'),
       routes: {
-        '/': (context) => const Placeholder(),
+        '/': (context) => const WelcomePage(),
         '/sign-in': (context) => const Placeholder(),
         '/sign-up': (context) => const Placeholder(),
         '/forgot-password': (context) => const Placeholder(),
