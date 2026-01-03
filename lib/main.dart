@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:progress_pals/features/auth/presentation/pages/welcome_page.dart';
 import 'package:progress_pals/firebase_options.dart';
 
 void main() async {
@@ -17,28 +18,24 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      initialRoute: '/',
       debugShowCheckedModeBanner: false,
       title: 'Progress Pals',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const MyHomePage(title: 'Progress Pals'),
-    );
-  }
-}
-
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title),
-      ),
+      // home: const MyHomePage(title: 'Progress Pals'),
+      routes: {
+        '/': (context) => const WelcomePage(),
+        '/sign-in': (context) => const Placeholder(),
+        '/sign-up': (context) => const Placeholder(),
+        '/forgot-password': (context) => const Placeholder(),
+        '/home': (context) => const Placeholder(),
+        '/friend-list': (context) => const Placeholder(),
+        '/add-friend': (context) => const Placeholder(),
+        '/analytics': (context) => const Placeholder(),
+        '/profile': (context) => const Placeholder(),
+      },
     );
   }
 }
