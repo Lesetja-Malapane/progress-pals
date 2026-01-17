@@ -9,7 +9,7 @@ dart run flutter_launcher_icons
 
 echo "\n"
 
-PS3='\nPlease enter your choice: '
+PS3='Please enter your choice: '
 options=("1 -> debug" "2 -> profile" "3 -> release" "4 -> show commands" "5 -> quit")
 select opt in "${options[@]}"
 do
