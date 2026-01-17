@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:progress_pals/firebase_options.dart';
-import 'package:progress_pals/features/auth/presentation/pages/welcome_page.dart';
+import 'package:progress_pals/presentation/pages/welcome_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

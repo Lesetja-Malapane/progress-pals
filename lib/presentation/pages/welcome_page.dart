@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:progress_pals/shared/widgets/app_button.dart';
+import 'package:progress_pals/presentation/widgets/app_button.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
 
 class WelcomePage extends StatelessWidget {
