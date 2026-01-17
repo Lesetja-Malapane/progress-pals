@@ -1,10 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:progress_pals/app_state.dart';
+import 'package:go_router/go_router.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
-import 'package:progress_pals/src/authentication.dart';
-import 'package:provider/provider.dart';
+import 'package:progress_pals/presentation/widgets/app_button.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -46,16 +44,16 @@ class WelcomePage extends StatelessWidget {
 
               const Spacer(flex: 3),
 
-              Center(
-                child: Consumer<ApplicationState>(
-                  builder: (context, appState, _) => AuthFunc(
-                    loggedIn: appState.loggedIn,
-                    signOut: () {
-                      FirebaseAuth.instance.signOut();
-                    },
-                  ),
-                ),
+              AppButton(
+                text: 'Login',
+                type: ButtonType.primary,
+                onPressed: () {
+                  context.push('/sign-in');
+                },
               ),
+
+              const SizedBox(height: 36),
+
               // const SizedBox(height: 20),
             ],
           ),
