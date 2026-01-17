@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>908446627310-e9gkd2ciprftonfjv2d286017mon8o53.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.908446627310-e9gkd2ciprftonfjv2d286017mon8o53</string>
+	<key>API_KEY</key>
+	<string>AIzaSyDJIAMW1vw-xD8r3u0Rujfm0QdAsA7FmeY</string>
+	<key>GCM_SENDER_ID</key>
+	<string>908446627310</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.lesetja.progressPals</string>
+	<key>PROJECT_ID</key>
+	<string>progress-pals-7cabd</string>
+	<key>STORAGE_BUCKET</key>
+	<string>progress-pals-7cabd.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:908446627310:ios:e95cb3c1c3be9b7dd70aff</string>
+</dict>
+</plist>
