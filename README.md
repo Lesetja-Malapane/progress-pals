@@ -15,6 +15,7 @@ For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
 
+mvvm & clean architecture
 lib/
 ├── core/                   # App-wide constants, themes, and generic utilities
 │   ├── error/              # Failure classes (ServerFailure, CacheFailure)
