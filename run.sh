@@ -1,10 +1,10 @@
 #bin/bash
 
-echo "\=============== nRunning 'flutter clean' and 'flutter pub get' ===============\n"
+echo "\n=============== nRunning 'flutter clean' and 'flutter pub get' ===============\n"
 flutter clean
 flutter pub get
 
-echo "\n=============== Create Launcher Icons ==============="
+echo "\n=============== Create Launcher Icons ===============\n"
 dart run flutter_launcher_icons
 
 echo "\n"

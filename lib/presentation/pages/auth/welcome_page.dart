@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:progress_pals/presentation/widgets/app_button.dart';
+import 'package:go_router/go_router.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
+import 'package:progress_pals/presentation/widgets/app_button.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -22,14 +23,14 @@ class WelcomePage extends StatelessWidget {
               Text(
                 'WELCOME\nBACK.',
                 style: TextStyle(
-                  fontSize: 40, 
+                  fontSize: 40,
                   fontWeight: FontWeight.w900,
                   color: AppColors.primary,
                   height: 1.1,
                   letterSpacing: -1.0,
                 ),
               ),
-              
+
               const Spacer(flex: 2),
 
               // 2. Illustration
@@ -47,21 +48,13 @@ class WelcomePage extends StatelessWidget {
                 text: 'Login',
                 type: ButtonType.primary,
                 onPressed: () {
-                  Navigator.pushNamed(context, '/sign-in');
+                  context.push('/sign-in');
                 },
               ),
-              
-              const SizedBox(height: 16),
-              
-              AppButton(
-                text: 'Sign-Up',
-                type: ButtonType.outline,
-                onPressed: () {
-                  Navigator.pushNamed(context, '/sign-up');
-                },
-              ),
-              
-              const SizedBox(height: 20),
+
+              const SizedBox(height: 36),
+
+              // const SizedBox(height: 20),
             ],
           ),
         ),
