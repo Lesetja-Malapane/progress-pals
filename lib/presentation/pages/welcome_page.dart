@@ -1,7 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:progress_pals/presentation/widgets/app_button.dart';
+import 'package:progress_pals/app_state.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
+import 'package:progress_pals/src/authentication.dart';
+import 'package:provider/provider.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -22,14 +25,14 @@ class WelcomePage extends StatelessWidget {
               Text(
                 'WELCOME\nBACK.',
                 style: TextStyle(
-                  fontSize: 40, 
+                  fontSize: 40,
                   fontWeight: FontWeight.w900,
                   color: AppColors.primary,
                   height: 1.1,
                   letterSpacing: -1.0,
                 ),
               ),
-              
+
               const Spacer(flex: 2),
 
               // 2. Illustration
@@ -43,25 +46,17 @@ class WelcomePage extends StatelessWidget {
 
               const Spacer(flex: 3),
 
-              AppButton(
-                text: 'Login',
-                type: ButtonType.primary,
-                onPressed: () {
-                  Navigator.pushNamed(context, '/sign-in');
-                },
+              Center(
+                child: Consumer<ApplicationState>(
+                  builder: (context, appState, _) => AuthFunc(
+                    loggedIn: appState.loggedIn,
+                    signOut: () {
+                      FirebaseAuth.instance.signOut();
+                    },
+                  ),
+                ),
               ),
-              
-              const SizedBox(height: 16),
-              
-              AppButton(
-                text: 'Sign-Up',
-                type: ButtonType.outline,
-                onPressed: () {
-                  Navigator.pushNamed(context, '/sign-up');
-                },
-              ),
-              
-              const SizedBox(height: 20),
+              // const SizedBox(height: 20),
             ],
           ),
         ),
