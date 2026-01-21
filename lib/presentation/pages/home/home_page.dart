@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
-import 'package:progress_pals/presentation/pages/viewmodels/home_viewmodel.dart';
+import 'package:progress_pals/presentation/pages/home/custom_navigation.dart';
+import 'package:progress_pals/presentation/viewmodels/home_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  static const List<Widget> pages = [
-    Center(child: Text('Home')),
+  static List<Widget> pages = [
+    Center(
+      child: FloatingActionButton(
+        onPressed: () => Logger().i('add a habit'),
+        tooltip: 'Add a habit',
+        child: Row(children: [Text('Add a Habit'), const Icon(Icons.add)]),
+      ),
+    ),
+    Center(child: Text("Manage Friends")),
+    Center(child: Text('Analytics')),
     Center(child: Text('Profile')),
   ];
 
@@ -18,29 +28,12 @@ class HomePage extends StatelessWidget {
       child: Consumer<HomeViewmodel>(
         builder: (context, homeViewModel, child) {
           return Scaffold(
-            backgroundColor: AppColors.white,
-
             body: IndexedStack(
               index: homeViewModel.selectedIndex,
               children: pages,
             ),
 
-            bottomNavigationBar: NavigationBar(
-              onDestinationSelected: (value) => homeViewModel.setIndex(value),
-              selectedIndex: homeViewModel.selectedIndex,
-              destinations: const [
-                NavigationDestination(
-                  icon: Icon(Icons.home_outlined),
-                  selectedIcon: Icon(Icons.home),
-                  label: "home",
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.person_outline),
-                  selectedIcon: Icon(Icons.person),
-                  label: 'Profile',
-                ),
-              ],
-            ),
+            bottomNavigationBar: CustomNavigationBar(),
           );
         },
       ),
