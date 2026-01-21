@@ -22,8 +22,6 @@ class HomePage extends StatelessWidget {
     const Center(child: Text('Profile')),
   ];
 
-  final double _size = 32;
-
   @override
   Widget build(BuildContext context) {
     final homeViewModel = Provider.of<HomeViewmodel>(context);
