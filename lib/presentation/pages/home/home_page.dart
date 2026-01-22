@@ -1,6 +1,7 @@
 import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/web.dart';
+import 'package:progress_pals/core/theme/app_colors.dart';
+import 'package:progress_pals/presentation/pages/home/home_content.dart';
 import 'package:progress_pals/presentation/viewmodels/home_viewmodel.dart';
 import 'package:provider/provider.dart';
 
@@ -8,23 +9,15 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   static final List<Widget> _pages = [
-    SafeArea(
-      child: Center(
-        child: FloatingActionButton(
-          onPressed: () => Logger().i('add a habit'),
-          tooltip: 'Add a habit',
-          child: const Icon(Icons.add),
-        ),
-      ),
-    ),
-    const Center(child: Text("Manage Friends")),
-    const Center(child: Text('Analytics')),
-    const Center(child: Text('Profile')),
+    HomeContent(),
+    Scaffold(body: const Center(child: Text("Manage Friends"))),
+    Scaffold(body: const Center(child: Text('Analytics'))),
+    Scaffold(body: const Center(child: Text('Profile'))),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final homeViewModel = Provider.of<HomeViewmodel>(context);
+    final homeViewModel = Provider.of<HomeViewModel>(context);
     return Scaffold(
       body: _pages[homeViewModel.selectedIndex],
       extendBody: true,
@@ -46,19 +39,19 @@ class HomePage extends StatelessWidget {
         items: [
           DotNavigationBarItem(
             icon: Icon(Icons.home),
-            selectedColor: Colors.purple,
+            selectedColor: AppColors.primary,
           ),
           DotNavigationBarItem(
             icon: Icon(Icons.people),
-            selectedColor: Colors.pink,
+            selectedColor: AppColors.primary,
           ),
           DotNavigationBarItem(
             icon: Icon(Icons.bar_chart),
-            selectedColor: Colors.orange,
+            selectedColor: AppColors.primary,
           ),
           DotNavigationBarItem(
             icon: Icon(Icons.person),
-            selectedColor: Colors.teal,
+            selectedColor: AppColors.primary,
           ),
         ],
       ),

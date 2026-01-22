@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => HomeViewmodel())],
+      providers: [ChangeNotifierProvider(create: (_) => HomeViewModel())],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         title: 'Progress Pals',
