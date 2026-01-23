@@ -19,6 +19,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final homeViewModel = Provider.of<HomeViewModel>(context);
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: _pages[homeViewModel.selectedIndex],
       extendBody: true,
       bottomNavigationBar: DotNavigationBar(

@@ -18,14 +18,14 @@ class DateBubble extends StatelessWidget {
       height: 38,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: isSelected ? AppColors.primary : AppColors.secondary,
+        color: isSelected ? AppColors.primary : AppColors.primaryLight,
         shape: BoxShape.circle,
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: isSelected ? Colors.white : Colors.black,
-          fontWeight: FontWeight.normal,
+          color: isSelected ? AppColors.textPrimary : AppColors.textDisabled,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

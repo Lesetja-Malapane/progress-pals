@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
 import 'package:progress_pals/presentation/viewmodels/home_viewmodel.dart';
@@ -25,14 +26,23 @@ class _HomeContentState extends State<HomeContent> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 100,
-        title: const Text("Today", style: TextStyle(color: Colors.black, fontSize: 32, fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Today",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
         automaticallyImplyLeading: false,
+        backgroundColor: AppColors.background,
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
               Logger().i("Add a habit");
+              context.push('/home/add-habit');
             },
           ),
         ],
