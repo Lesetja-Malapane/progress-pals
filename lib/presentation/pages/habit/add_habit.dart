@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
 import 'package:progress_pals/data/datasources/local/database_service.dart';
 import 'package:progress_pals/data/models/habit_model.dart';
+import 'package:progress_pals/presentation/viewmodels/home_viewmodel.dart';
 import 'package:progress_pals/presentation/widgets/app_button.dart';
+import 'package:provider/provider.dart';
 
 class AddHabitScreen extends StatefulWidget {
   const AddHabitScreen({super.key});
@@ -36,9 +39,15 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     super.dispose();
   }
 
-  void _handleSubmit() {
+  Future<void> _handleSubmit() async {
     if (_formKey.currentState!.validate()) {
-      // Handle form submission
+      final User? currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser == null) {
+        print("Error: No user logged in!");
+        return;
+      }
+
       final habitData = {
         'name': _nameController.text,
         'description': _descriptionController.text,
@@ -48,18 +57,24 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
 
       final HabitModel habit = HabitModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
-        userId: '123',
+        userId: currentUser.uid,
         name: _nameController.text,
         description: _descriptionController.text,
         repeatPerWeek: _repeatPerWeek,
         completedCount: 0,
-        sharedWith: [_shareWithController.text],
+        sharedWith: _shareWithController.text,
       );
 
-      _databaseService.insertHabit(habit);
+      await _databaseService.insertHabit(habit);
 
       Logger().i('Habit data: $habitData');
-      Navigator.pop(context, habitData);
+
+      // Refresh the habits list in HomeViewModel
+      if (mounted) {
+        final homeViewModel = context.read<HomeViewModel>();
+        await homeViewModel.fetchHabits();
+        Navigator.pop(context, habitData);
+      }
     }
   }
 
@@ -72,7 +87,9 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
         title: const Text(
           'Add New Habit',

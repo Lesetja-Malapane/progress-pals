@@ -1,20 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class HabitModel {
   final String id;
-  final String userId; // CHANGED: Needed for security & queries
+  final String userId;
   final String name;
   final String description;
-  final int repeatPerWeek; // e.g., 3 means "3 times a week"
+  final int repeatPerWeek;
   final bool isSynced;
 
   // TRACKING
   final int completedCount;
-  final DateTime? lastCompletedDate; // Used to check if we need to reset
+  final DateTime? lastCompletedDate;
 
   // SOCIAL
-  // A list of friend UIDs is usually easier to manage than a Map for beginners
-  final List<String> sharedWith;
+  // Share with a friend (insert their email here)
+  final String sharedWith;
 
   HabitModel({
     required this.id,
@@ -44,21 +42,45 @@ class HabitModel {
   }
 
   factory HabitModel.fromMap(Map<String, dynamic> map) {
+    // Helper function to safely convert any value to String
+    String toSafeString(dynamic value) {
+      if (value == null) return '';
+      if (value is String) return value;
+      if (value is int) return value.toString();
+      if (value is double) return value.toString();
+      if (value is bool) return value.toString();
+      // Handle binary data (Uint8List)
+      if (value is List) {
+        try {
+          return String.fromCharCodes(value.cast<int>());
+        } catch (e) {
+          return '';
+        }
+      }
+      return value.toString();
+    }
+
+    // Parse lastCompletedDate safely
+    DateTime? parsedDate;
+    try {
+      final dateStr = toSafeString(map['lastCompletedDate']);
+      if (dateStr.isNotEmpty) {
+        parsedDate = DateTime.tryParse(dateStr);
+      }
+    } catch (e) {
+      parsedDate = null;
+    }
+
     return HabitModel(
-      id: map['id'] ?? '',
-      userId: map['userId'] ?? '',
-      name: map['name'] ?? '',
-      description: map['description'] ?? '',
-      repeatPerWeek: map['repeatPerWeek'] ?? 0,
-      completedCount: map['completedCount'] ?? 0,
-      // Convert DateTime string back to DateTime (SQLite stores as ISO string)
-      lastCompletedDate: map['lastCompletedDate'] != null
-          ? DateTime.parse(map['lastCompletedDate'] as String)
-          : null,
-      sharedWith: map['sharedWith'] is String
-          ? [map['sharedWith'] as String]
-          : List<String>.from(map['sharedWith'] ?? []),
-      isSynced: map['isSynced'] == 1,
+      id: toSafeString(map['id']),
+      userId: toSafeString(map['userId']),
+      name: toSafeString(map['name']),
+      description: toSafeString(map['description']),
+      repeatPerWeek: (map['repeatPerWeek'] as int?) ?? 0,
+      completedCount: (map['completedCount'] as int?) ?? 0,
+      lastCompletedDate: parsedDate,
+      sharedWith: toSafeString(map['sharedWith']),
+      isSynced: (map['isSynced'] as int?) == 1,
     );
   }
 }
