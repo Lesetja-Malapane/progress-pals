@@ -40,7 +40,7 @@ class HabitModel {
       'lastCompletedDate': lastCompletedDate != null
           ? Timestamp.fromDate(lastCompletedDate!)
           : null,
-      'sharedWith': sharedWith,
+      'sharedWith': sharedWith[0],
       'isSynced': isSynced ? 1 : 0,
     };
   }

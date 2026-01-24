@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
+import 'package:progress_pals/data/datasources/local/database_service.dart';
+import 'package:progress_pals/data/models/habit_model.dart';
 import 'package:progress_pals/presentation/widgets/app_button.dart';
 
 class AddHabitScreen extends StatefulWidget {
@@ -10,6 +13,7 @@ class AddHabitScreen extends StatefulWidget {
 }
 
 class _AddHabitScreenState extends State<AddHabitScreen> {
+  final DatabaseService _databaseService = DatabaseService();
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
   late TextEditingController _shareWithController;
@@ -41,8 +45,20 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
         'repeatPerWeek': _repeatPerWeek,
         'shareWith': _shareWithController.text,
       };
-      print('Habit data: $habitData');
-      // TODO: Save to Firebase or backend
+
+      final HabitModel habit = HabitModel(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        userId: '123',
+        name: _nameController.text,
+        description: _descriptionController.text,
+        repeatPerWeek: _repeatPerWeek,
+        completedCount: 0,
+        sharedWith: [_shareWithController.text],
+      );
+
+      _databaseService.insertHabit(habit);
+
+      Logger().i('Habit data: $habitData');
       Navigator.pop(context, habitData);
     }
   }

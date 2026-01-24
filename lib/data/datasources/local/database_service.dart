@@ -1,3 +1,4 @@
+import 'package:logger/web.dart';
 import 'package:progress_pals/data/models/habit_model.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -7,7 +8,7 @@ abstract class AppDatabase {
 }
 
 class DatabaseService implements AppDatabase {
-  static late Database? _database;
+  static Database? _database;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -17,12 +18,14 @@ class DatabaseService implements AppDatabase {
 
   @override
   Future<Database> initDatabase() async {
-    var database = await openDatabase(
+    _database = await openDatabase(
       "habits.db",
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
             CREATE TABLE IF NOT EXISTS Habits (
               id TEXT PRIMARY KEY, 
+              userId TEXT,
               name TEXT, 
               description TEXT, 
               repeatPerWeek INTEGER, 
@@ -33,14 +36,19 @@ class DatabaseService implements AppDatabase {
             )
           ''');
       },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('ALTER TABLE Habits ADD COLUMN userId TEXT');
+        }
+      },
     );
-    return Future.value(database);
+    return _database!;
   }
 
   @override
   Future<void> closeDatabase() async {
-    await _database?.delete('Habits');
-    return Future.value();
+    await _database?.close();
+    _database = null;
   }
 
   Future<void> insertHabit(HabitModel habit) async {
@@ -50,6 +58,7 @@ class DatabaseService implements AppDatabase {
       habit.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    Logger().i('Habit inserted: $habit');
   }
 
   Future<List<HabitModel>> getHabits() async {
