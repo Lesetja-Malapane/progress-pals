@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:progress_pals/app_router.dart';
+import 'package:progress_pals/data/datasources/local/database_service.dart';
+import 'package:progress_pals/data/repositories/habit_repository.dart';
 import 'package:progress_pals/presentation/viewmodels/home_viewmodel.dart';
 
 void main() async {
@@ -19,7 +21,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => HomeViewModel())],
+      providers: [
+        Provider(create: (_) => DatabaseService()),
+        ProxyProvider<DatabaseService, HabitRepository>(
+          create: (context) => HabitRepository(context.read<DatabaseService>()),
+          update: (context, databaseService, previous) =>
+              HabitRepository(databaseService),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => HomeViewModel(context.read<HabitRepository>()),
+        ),
+      ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         title: 'Progress Pals',

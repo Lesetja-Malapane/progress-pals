@@ -36,11 +36,9 @@ class HabitModel {
       'description': description,
       'repeatPerWeek': repeatPerWeek,
       'completedCount': completedCount,
-      // Store DateTime as a Firestore Timestamp
-      'lastCompletedDate': lastCompletedDate != null
-          ? Timestamp.fromDate(lastCompletedDate!)
-          : null,
-      'sharedWith': sharedWith[0],
+      // Store DateTime as ISO string for SQLite
+      'lastCompletedDate': lastCompletedDate?.toIso8601String(),
+      'sharedWith': sharedWith,
       'isSynced': isSynced ? 1 : 0,
     };
   }
@@ -53,11 +51,13 @@ class HabitModel {
       description: map['description'] ?? '',
       repeatPerWeek: map['repeatPerWeek'] ?? 0,
       completedCount: map['completedCount'] ?? 0,
-      // Convert Firestore Timestamp back to DateTime
+      // Convert DateTime string back to DateTime (SQLite stores as ISO string)
       lastCompletedDate: map['lastCompletedDate'] != null
-          ? (map['lastCompletedDate'] as Timestamp).toDate()
+          ? DateTime.parse(map['lastCompletedDate'] as String)
           : null,
-      sharedWith: List<String>.from(map['sharedWith'] ?? []),
+      sharedWith: map['sharedWith'] is String
+          ? [map['sharedWith'] as String]
+          : List<String>.from(map['sharedWith'] ?? []),
       isSynced: map['isSynced'] == 1,
     );
   }
