@@ -2,6 +2,7 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:progress_pals/presentation/pages/auth/welcome_page.dart';
+import 'package:progress_pals/presentation/pages/habit/add_habit.dart';
 import 'package:progress_pals/presentation/pages/home/home_page.dart';
 
 final appRouter = GoRouter(
@@ -76,16 +77,22 @@ final appRouter = GoRouter(
           },
         ),
         GoRoute(
-          path: '/home',
+          path: 'home',
           builder: (context, state) {
             return HomePage();
           },
-        ),
-        GoRoute(
-          path: '/home/profile',
-          builder: (context, state) {
-            return Placeholder();
-          },
+          routes: [
+            GoRoute(
+              path: 'add-habit',
+              builder: (context, state) => const AddHabitScreen(),
+            ),
+            GoRoute(
+              path: 'profile',
+              builder: (context, state) {
+                return Placeholder();
+              },
+            ),
+          ],
         ),
       ],
     ),
