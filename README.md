@@ -34,3 +34,5 @@ lib/
 │   ├── viewmodels/         # ChangeNotifier / BLoC / StateNotifier
 │   └── widgets/            # HabitTile, StreakChart, CustomButton
 └── main.dart
+
+-> Rive for custom navbar
