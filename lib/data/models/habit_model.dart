@@ -6,14 +6,15 @@ class HabitModel {
   final String name;
   final String description;
   final int repeatPerWeek; // e.g., 3 means "3 times a week"
-  
+  final bool isSynced;
+
   // TRACKING
   final int completedCount;
   final DateTime? lastCompletedDate; // Used to check if we need to reset
-  
+
   // SOCIAL
   // A list of friend UIDs is usually easier to manage than a Map for beginners
-  final List<String> sharedWith; 
+  final List<String> sharedWith;
 
   HabitModel({
     required this.id,
@@ -24,6 +25,7 @@ class HabitModel {
     required this.completedCount,
     this.lastCompletedDate,
     required this.sharedWith,
+    this.isSynced = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -35,10 +37,11 @@ class HabitModel {
       'repeatPerWeek': repeatPerWeek,
       'completedCount': completedCount,
       // Store DateTime as a Firestore Timestamp
-      'lastCompletedDate': lastCompletedDate != null 
-          ? Timestamp.fromDate(lastCompletedDate!) 
+      'lastCompletedDate': lastCompletedDate != null
+          ? Timestamp.fromDate(lastCompletedDate!)
           : null,
       'sharedWith': sharedWith,
+      'isSynced': isSynced ? 1 : 0,
     };
   }
 
@@ -51,10 +54,11 @@ class HabitModel {
       repeatPerWeek: map['repeatPerWeek'] ?? 0,
       completedCount: map['completedCount'] ?? 0,
       // Convert Firestore Timestamp back to DateTime
-      lastCompletedDate: map['lastCompletedDate'] != null 
-          ? (map['lastCompletedDate'] as Timestamp).toDate() 
+      lastCompletedDate: map['lastCompletedDate'] != null
+          ? (map['lastCompletedDate'] as Timestamp).toDate()
           : null,
       sharedWith: List<String>.from(map['sharedWith'] ?? []),
+      isSynced: map['isSynced'] == 1,
     );
   }
 }
