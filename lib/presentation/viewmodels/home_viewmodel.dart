@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:progress_pals/data/models/habit_model.dart';
+import 'package:progress_pals/data/repositories/habit_repository.dart';
 
 class HomeViewModel extends ChangeNotifier {
   int _selectedIndex = 0;
@@ -10,17 +12,55 @@ class HomeViewModel extends ChangeNotifier {
   List<String> get weekDays => _weekDays;
   int get currentDayIndex => _currentDayIndex;
 
-  HomeViewModel() {
+  final IHabitRepository _habitRepository;
+  List<HabitModel> _habits = [];
+  bool _isLoading = false;
+
+  List<HabitModel> get habits => _habits;
+  bool get isLoading => _isLoading;
+
+  HomeViewModel(this._habitRepository) {
     _init();
   }
 
-    Future<void> _init() async {
+  Future<void> _init() async {
     _setupDate();
+    await fetchHabits();
   }
 
   void _setupDate() {
     _currentDayIndex = DateTime.now().weekday - 1;
     notifyListeners();
+  }
+
+  Future<void> fetchHabits() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      _habits = await _habitRepository.getHabits();
+    } catch (e) {
+      print('Error fetching habits: $e');
+    }
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> completeHabit(String habitId) async {
+    try {
+      await _habitRepository.completeHabit(habitId);
+      await fetchHabits();
+    } catch (e) {
+      print('Error completing habit: $e');
+    }
+  }
+
+  Future<void> deleteHabit(String habitId) async {
+    try {
+      await _habitRepository.deleteHabit(habitId);
+      await fetchHabits();
+    } catch (e) {
+      print('Error deleting habit: $e');
+    }
   }
 
   void setIndex(int index) {
