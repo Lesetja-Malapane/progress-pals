@@ -4,7 +4,7 @@ import 'package:progress_pals/core/theme/app_colors.dart';
 import 'package:progress_pals/presentation/pages/home/home_content.dart';
 import 'package:progress_pals/presentation/pages/friends/friends_page.dart';
 import 'package:progress_pals/presentation/pages/analytics/analytics_page.dart';
-import 'package:progress_pals/presentation/pages/profile/profile_page.dart';
+import 'package:progress_pals/presentation/pages/profile/profile_page_new.dart';
 import 'package:progress_pals/presentation/viewmodels/home_viewmodel.dart';
 import 'package:provider/provider.dart';
 

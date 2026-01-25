@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
 import 'package:progress_pals/data/datasources/local/database_service.dart';
+import 'package:progress_pals/data/datasources/remote/firebase_service.dart';
 import 'package:progress_pals/data/models/friend_model.dart';
 import 'package:progress_pals/presentation/widgets/app_button.dart';
 
@@ -17,6 +18,7 @@ class AddFriendScreen extends StatefulWidget {
 
 class _AddFriendScreenState extends State<AddFriendScreen> {
   final DatabaseService _databaseService = DatabaseService();
+  final FirebaseService _firebaseService = FirebaseService();
   late TextEditingController _nameController;
   late TextEditingController _emailController;
   final _formKey = GlobalKey<FormState>();
@@ -43,44 +45,81 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
     super.dispose();
   }
 
-  Future<void> _handleSubmit() async {
-    if (_formKey.currentState!.validate()) {
-      final User? currentUser = FirebaseAuth.instance.currentUser;
+  void onAddFriendPressed() async {
+    final emailToFind = _emailController.text.trim().toLowerCase();
 
-      if (currentUser == null) {
-        Logger().e("Error: No user logged in!");
-        return;
-      }
+    // 1. SEARCH FIRST
+    final foundUserData = await _firebaseService.getUserByEmail(emailToFind);
 
-      if (_editingFriend != null) {
-        // Update existing friend
-        final updatedFriend = FriendModel(
-          id: _editingFriend!.id,
-          userId: _editingFriend!.userId,
-          name: _nameController.text,
-          email: _emailController.text,
-          addedDate: _editingFriend!.addedDate,
-        );
-        await _databaseService.updateFriend(updatedFriend);
-        Logger().i('Friend updated: ${updatedFriend.name}');
-      } else {
-        // Create new friend
-        final friend = FriendModel(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          userId: currentUser.uid,
-          email: _emailController.text,
-          name: _nameController.text,
-          addedDate: DateTime.now(),
-        );
-        await _databaseService.insertFriend(friend);
-        Logger().i('Friend created: ${friend.name}');
-      }
-
-      if (mounted) {
-        Navigator.pop(context, true);
-      }
+    if (foundUserData == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User not found! Check the email.')),
+      );
+      return;
     }
+
+    // 2. USE THE REAL DATA FOUND
+
+    final newFriend = FriendModel(
+      id: DateTime.now().millisecondsSinceEpoch
+          .toString(), // Unique ID for the friendship itself
+      userId:
+          foundUserData['userId'], // <--- THIS IS THE FIX (The Friend's real UID)
+      name: foundUserData['displayName'] ?? 'Unknown',
+      email: foundUserData['email'],
+      addedDate: DateTime.now()
+      // ... any other fields
+    );
+
+    // 3. SAVE TO YOUR FRIENDS LIST
+    // Note: We pass currentUserId because we are saving this into YOUR subcollection
+    final currentUserId = FirebaseAuth.instance.currentUser!.uid;
+
+    await _firebaseService.addFriendToUser(currentUserId, newFriend);
+
+    Navigator.pop(context);
   }
+
+  // Future<void> _handleSubmit() async {
+  //   if (_formKey.currentState!.validate()) {
+  //     final User? currentUser = FirebaseAuth.instance.currentUser;
+
+  //     if (currentUser == null) {
+  //       Logger().e("Error: No user logged in!");
+  //       return;
+  //     }
+
+  //     if (_editingFriend != null) {
+  //       // Update existing friend
+  //       final updatedFriend = FriendModel(
+  //         id: _editingFriend!.id,
+  //         userId: _editingFriend!.userId,
+  //         name: _nameController.text,
+  //         email: _emailController.text,
+  //         addedDate: _editingFriend!.addedDate,
+  //       );
+  //       await _databaseService.updateFriend(updatedFriend);
+  //       Logger().i('Friend updated: ${updatedFriend.name}');
+  //     } else {
+  //       // Create new friend
+  //       final friend = FriendModel(
+  //         id: DateTime.now().millisecondsSinceEpoch.toString(),
+  //         userId: currentUser.uid,
+  //         email: _emailController.text,
+  //         name: _nameController.text,
+  //         addedDate: DateTime.now(),
+  //       );
+  //       await _databaseService.insertFriend(friend);
+  //       await _firebaseService.addFriendToUser(friend);
+
+  //       Logger().i('Friend created: ${friend.name}');
+  //     }
+
+  //     if (mounted) {
+  //       Navigator.pop(context, true);
+  //     }
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -157,7 +196,7 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
                 // Submit Button
                 AppButton(
                   text: _editingFriend != null ? 'Update Friend' : 'Add Friend',
-                  onPressed: _handleSubmit,
+                  onPressed: onAddFriendPressed,
                 ),
                 const SizedBox(height: 16),
 

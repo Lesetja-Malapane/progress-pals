@@ -1,8 +1,10 @@
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:progress_pals/data/datasources/remote/firebase_service.dart';
 import 'package:progress_pals/data/models/habit_model.dart';
 import 'package:progress_pals/data/models/friend_model.dart';
+import 'package:progress_pals/data/models/user_model.dart';
 import 'package:progress_pals/presentation/pages/auth/welcome_page.dart';
 import 'package:progress_pals/presentation/pages/habit/add_habit.dart';
 import 'package:progress_pals/presentation/pages/friends/add_friend.dart';
@@ -37,9 +39,6 @@ final appRouter = GoRouter(
                   };
                   if (user == null) {
                     return;
-                  }
-                  if (state is UserCreated) {
-                    user.updateDisplayName(user.email!.split('@')[0]);
                   }
                   if (!user.emailVerified) {
                     user.sendEmailVerification();
@@ -118,6 +117,7 @@ final appRouter = GoRouter(
         ),
       ],
     ),
+    
   ],
 );
 

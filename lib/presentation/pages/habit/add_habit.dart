@@ -40,7 +40,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       _editingHabit = widget.habit;
       _nameController.text = widget.habit!.name;
       _descriptionController.text = widget.habit!.description;
-      _shareWithController.text = widget.habit!.sharedWith;
+      _shareWithController.text = widget.habit!.sharedWith[0];
       _repeatPerWeek = widget.habit!.repeatPerWeek;
     }
   }
@@ -80,7 +80,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
           completedCount: _editingHabit!.completedCount,
           lastCompletedDate: _editingHabit!.lastCompletedDate,
           lastResetDate: _editingHabit!.lastResetDate,
-          sharedWith: _shareWithController.text,
+          sharedWith: [ _shareWithController.text.trim().toLowerCase() ],
           isSynced: false,
         );
         await _databaseService.updateHabit(updatedHabit);
@@ -94,7 +94,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
           description: _descriptionController.text,
           repeatPerWeek: _repeatPerWeek,
           completedCount: 0,
-          sharedWith: _shareWithController.text,
+          sharedWith: [ _shareWithController.text.trim().toLowerCase() ],
         );
         await _databaseService.insertHabit(habit);
         await _firebaseService.addHabit(habit);

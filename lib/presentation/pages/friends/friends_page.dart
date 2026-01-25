@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
 import 'package:progress_pals/data/datasources/local/database_service.dart';
+import 'package:progress_pals/data/datasources/remote/firebase_service.dart';
 import 'package:progress_pals/data/models/friend_model.dart';
 
 class FriendsPage extends StatefulWidget {
@@ -15,6 +16,8 @@ class FriendsPage extends StatefulWidget {
 
 class _FriendsPageState extends State<FriendsPage> {
   final DatabaseService _databaseService = DatabaseService();
+  final FirebaseService _firebaseService = FirebaseService();
+
   List<FriendModel> _friends = [];
   bool _isLoading = false;
 
@@ -55,6 +58,7 @@ class _FriendsPageState extends State<FriendsPage> {
                 Navigator.pop(context);
                 try {
                   await _databaseService.deleteFriend(friend.id);
+                  await _firebaseService.removeFriend(friend.id);
                   await _loadFriends();
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('${friend.name} removed!')),

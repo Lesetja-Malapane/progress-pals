@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:logger/web.dart';
 import 'package:progress_pals/data/models/friend_model.dart';
 import 'package:progress_pals/data/models/habit_model.dart';
@@ -169,7 +170,7 @@ class DatabaseService implements AppDatabase {
 
     // Sync to Firebase
     try {
-      await _firebaseService.addFriend(friend);
+      await _firebaseService.addFriendToUser(friend.userId!, friend);
     } catch (e) {
       Logger().w('Failed to sync friend to Firebase: $e');
     }

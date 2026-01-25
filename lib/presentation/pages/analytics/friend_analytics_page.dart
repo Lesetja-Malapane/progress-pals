@@ -33,15 +33,21 @@ class _FriendAnalyticsPageState extends State<FriendAnalyticsPage> {
     try {
       if (widget.friend == null) return;
 
-      // Load habits from Firebase using the friend's userId
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser?.email == null) return;
+
+      // Load only habits shared with current user
       final firebaseService = FirebaseService();
-      final friendHabits = await firebaseService.getHabitsOnce(
+      firebaseService.debugFriendHabits(widget.friend!.userId);
+      final friendHabits = await firebaseService.getSharedHabitsFromFriend(
         widget.friend!.userId,
       );
 
       setState(() => _friendHabits = friendHabits);
 
-      Logger().i('Loaded ${friendHabits.length} habits for friend from cloud');
+      Logger().i(
+        'Loaded ${friendHabits.length} shared habits for friend from cloud',
+      );
     } catch (e) {
       Logger().e('Error loading friend habits: $e');
     }

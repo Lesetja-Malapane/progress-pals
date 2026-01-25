@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class HabitModel {
   final String id;
   final String userId;
@@ -13,7 +15,7 @@ class HabitModel {
 
   // SOCIAL
   // Share with a friend (insert their email here)
-  final String sharedWith;
+  final List<String> sharedWith;
 
   HabitModel({
     required this.id,
@@ -39,7 +41,7 @@ class HabitModel {
       // Store DateTime as ISO string for SQLite
       'lastCompletedDate': lastCompletedDate?.toIso8601String(),
       'lastResetDate': lastResetDate?.toIso8601String(),
-      'sharedWith': sharedWith,
+      'sharedWith': jsonEncode(sharedWith),
       'isSynced': isSynced ? 1 : 0,
     };
   }
@@ -54,13 +56,27 @@ class HabitModel {
       if (value is bool) return value.toString();
       // Handle binary data (Uint8List)
       if (value is List) {
-        try {
-          return String.fromCharCodes(value.cast<int>());
-        } catch (e) {
-          return '';
-        }
+        return value.map((e) => e.toString()).join(',');
       }
       return value.toString();
+    }
+
+    List<String> parseSharedWith(dynamic value) {
+      if (value == null) return [];
+      
+      // If it's already a List (from Firestore), just return it
+      if (value is List) return List<String>.from(value);
+      
+      // If it's a String (from SQLite), decode it
+      if (value is String) {
+        try {
+          return List<String>.from(jsonDecode(value));
+        } catch (e) {
+          return [];
+        }
+      }
+      
+      return [];
     }
 
     // Parse lastCompletedDate safely
@@ -85,7 +101,7 @@ class HabitModel {
       lastResetDate: map['lastResetDate'] != null
           ? DateTime.tryParse(toSafeString(map['lastResetDate']))
           : null,
-      sharedWith: toSafeString(map['sharedWith']),
+      sharedWith: parseSharedWith(map['sharedWith']),
       isSynced: (map['isSynced'] as int?) == 1,
     );
   }
