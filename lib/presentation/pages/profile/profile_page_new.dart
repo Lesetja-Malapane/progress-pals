@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
+import 'package:progress_pals/core/theme/theme_provider.dart';
+import 'package:progress_pals/data/datasources/local/database_service.dart';
 import 'package:progress_pals/presentation/widgets/app_button.dart';
+import 'package:provider/provider.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -14,11 +17,36 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   late User? _currentUser;
+  bool _isSyncing = false;
 
   @override
   void initState() {
     super.initState();
     _currentUser = FirebaseAuth.instance.currentUser;
+  }
+
+  Future<void> _syncData() async {
+    setState(() => _isSyncing = true);
+    try {
+      final userId = _currentUser?.uid;
+      if (userId != null) {
+        final databaseService = context.read<DatabaseService>();
+        await databaseService.syncAllData(userId);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Data synced successfully!')),
+          );
+        }
+      }
+    } catch (e) {
+      Logger().e('Error syncing data: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Sync failed: $e')));
+      }
+    }
+    setState(() => _isSyncing = false);
   }
 
   Future<void> _logout() async {
@@ -39,7 +67,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 try {
                   await FirebaseAuth.instance.signOut();
                   if (mounted) {
-                    context.go('/');
+                    context.pushReplacement('/');
                   }
                 } catch (e) {
                   Logger().e('Error logging out: $e');
@@ -82,21 +110,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 width: 100,
                 height: 100,
                 decoration: BoxDecoration(
+                  color: AppColors.primary,
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.primary,
-                      AppColors.primary.withValues(alpha: 0.6),
-                    ],
-                  ),
                 ),
                 child: Center(
                   child: Text(
-                    _currentUser?.email?.isNotEmpty == true
-                        ? _currentUser!.email![0].toUpperCase()
-                        : 'U',
+                    _currentUser?.displayName?.isNotEmpty == true
+                        ? _currentUser!.displayName![0].toUpperCase()
+                        : _currentUser?.email?[0].toUpperCase() ?? 'U',
                     style: const TextStyle(
                       fontSize: 48,
                       fontWeight: FontWeight.bold,
@@ -144,28 +165,21 @@ class _ProfilePageState extends State<ProfilePage> {
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildInfoRow('Email:', _currentUser?.email ?? 'N/A'),
-                    const SizedBox(height: 12),
                     _buildInfoRow(
-                      'User ID:',
-                      _currentUser?.uid.substring(0, 8) ?? 'N/A',
+                      'Email Verified',
+                      _currentUser?.emailVerified == true ? 'Yes' : 'No',
                     ),
                     const SizedBox(height: 12),
                     _buildInfoRow(
-                      'Account Created:',
+                      'Account Created',
                       _currentUser?.metadata.creationTime?.toString().split(
-                            '.',
+                            ' ',
                           )[0] ??
                           'N/A',
-                    ),
-                    const SizedBox(height: 12),
-                    _buildInfoRow(
-                      'Email Verified:',
-                      _currentUser?.emailVerified == true ? 'Yes' : 'No',
                     ),
                   ],
                 ),
@@ -189,7 +203,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -201,14 +215,21 @@ class _ProfilePageState extends State<ProfilePage> {
                           style: TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 14,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        Switch(
-                          value: false,
-                          onChanged: (value) {
-                            setState(() {});
+                        Consumer<ThemeProvider>(
+                          builder: (context, themeProvider, _) {
+                            return Switch(
+                              value: themeProvider.themeMode == ThemeMode.dark,
+                              onChanged: (value) async {
+                                await themeProvider.setThemeMode(
+                                  value ? ThemeMode.dark : ThemeMode.light,
+                                );
+                              },
+                              activeThumbColor: AppColors.primary,
+                            );
                           },
-                          activeThumbColor: AppColors.primary,
                         ),
                       ],
                     ),
@@ -216,6 +237,15 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
               const SizedBox(height: 32),
+
+              // Sync Button
+              _isSyncing
+                  ? const Center(child: CircularProgressIndicator())
+                  : AppButton(
+                      text: 'Sync Data with Cloud',
+                      onPressed: _syncData,
+                    ),
+              const SizedBox(height: 16),
 
               // Logout Button
               AppButton(

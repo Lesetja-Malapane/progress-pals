@@ -1,13 +1,14 @@
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:progress_pals/data/models/habit_model.dart';
 import 'package:progress_pals/data/models/friend_model.dart';
 import 'package:progress_pals/presentation/pages/auth/welcome_page.dart';
 import 'package:progress_pals/presentation/pages/habit/add_habit.dart';
 import 'package:progress_pals/presentation/pages/friends/add_friend.dart';
 import 'package:progress_pals/presentation/pages/home/home_page.dart';
 import 'package:progress_pals/presentation/pages/analytics/friend_analytics_page.dart';
-import 'package:progress_pals/presentation/pages/profile/profile_page.dart';
+import 'package:progress_pals/presentation/pages/profile/profile_page_new.dart';
 
 final appRouter = GoRouter(
   routes: [
@@ -88,7 +89,10 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: 'add-habit',
-              builder: (context, state) => const AddHabitScreen(),
+              builder: (context, state) {
+                final habit = state.extra as HabitModel?;
+                return AddHabitScreen(habit: habit);
+              },
             ),
             GoRoute(
               path: 'add-friend',

@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
-import 'package:progress_pals/data/datasources/local/database_service.dart';
+import 'package:progress_pals/data/datasources/remote/firebase_service.dart';
 import 'package:progress_pals/data/models/friend_model.dart';
 import 'package:progress_pals/data/models/habit_model.dart';
 
@@ -16,7 +16,6 @@ class FriendAnalyticsPage extends StatefulWidget {
 }
 
 class _FriendAnalyticsPageState extends State<FriendAnalyticsPage> {
-  final DatabaseService _databaseService = DatabaseService();
   List<HabitModel> _friendHabits = [];
   bool _isLoading = false;
 
@@ -30,12 +29,19 @@ class _FriendAnalyticsPageState extends State<FriendAnalyticsPage> {
 
   Future<void> _loadFriendHabits() async {
     setState(() => _isLoading = true);
+
     try {
-      final habits = await _databaseService.getHabits();
-      final friendHabits = habits
-          .where((h) => h.userId == widget.friend!.userId)
-          .toList();
+      if (widget.friend == null) return;
+
+      // Load habits from Firebase using the friend's userId
+      final firebaseService = FirebaseService();
+      final friendHabits = await firebaseService.getHabitsOnce(
+        widget.friend!.userId,
+      );
+
       setState(() => _friendHabits = friendHabits);
+
+      Logger().i('Loaded ${friendHabits.length} habits for friend from cloud');
     } catch (e) {
       Logger().e('Error loading friend habits: $e');
     }

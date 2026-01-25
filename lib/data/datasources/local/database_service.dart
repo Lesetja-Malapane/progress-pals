@@ -1,6 +1,7 @@
 import 'package:logger/web.dart';
 import 'package:progress_pals/data/models/friend_model.dart';
 import 'package:progress_pals/data/models/habit_model.dart';
+import 'package:progress_pals/data/datasources/remote/firebase_service.dart';
 import 'package:sqflite/sqflite.dart';
 
 abstract class AppDatabase {
@@ -10,6 +11,7 @@ abstract class AppDatabase {
 
 class DatabaseService implements AppDatabase {
   static Database? _database;
+  final FirebaseService _firebaseService = FirebaseService();
 
   Future<Database> get database async {
     if (_database != null) return _database!;
@@ -84,6 +86,13 @@ class DatabaseService implements AppDatabase {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     Logger().i('Habit inserted: $habit');
+
+    // Sync to Firebase
+    try {
+      await _firebaseService.addHabit(habit);
+    } catch (e) {
+      Logger().w('Failed to sync habit to Firebase: $e');
+    }
   }
 
   Future<List<HabitModel>> getHabits() async {
@@ -102,11 +111,40 @@ class DatabaseService implements AppDatabase {
       where: 'id = ?',
       whereArgs: [habit.id],
     );
+    Logger().i('Habit updated locally');
+
+    // Sync to Firebase
+    try {
+      await _firebaseService.updateHabit(habit);
+    } catch (e) {
+      Logger().w('Failed to sync habit update to Firebase: $e');
+    }
   }
 
   Future<void> deleteHabit(String id) async {
     final db = await database;
+
+    // First, fetch the habit to get the userId for Firebase sync.
+    final List<Map<String, dynamic>> maps = await db.query(
+      'Habits',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+
+    // Delete the habit locally.
     await db.delete('Habits', where: 'id = ?', whereArgs: [id]);
+    Logger().i('Habit deleted locally');
+
+    // If the habit existed locally, sync the deletion to Firebase.
+    if (maps.isNotEmpty) {
+      final habit = HabitModel.fromMap(maps.first);
+      try {
+        await _firebaseService.deleteHabit(id, habit.userId!);
+      } catch (e) {
+        Logger().w('Failed to sync habit deletion to Firebase: $e');
+      }
+    }
   }
 
   Future<void> markHabitAsSynced(String id) async {
@@ -128,6 +166,13 @@ class DatabaseService implements AppDatabase {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     Logger().i('Friend added: ${friend.name}');
+
+    // Sync to Firebase
+    try {
+      await _firebaseService.addFriend(friend);
+    } catch (e) {
+      Logger().w('Failed to sync friend to Firebase: $e');
+    }
   }
 
   Future<List<FriendModel>> getFriends(String userId) async {
@@ -146,6 +191,13 @@ class DatabaseService implements AppDatabase {
     final db = await database;
     await db.delete('Friends', where: 'id = ?', whereArgs: [friendId]);
     Logger().i('Friend removed');
+
+    // Sync deletion to Firebase
+    try {
+      await _firebaseService.removeFriend(friendId);
+    } catch (e) {
+      Logger().w('Failed to sync friend deletion to Firebase: $e');
+    }
   }
 
   Future<void> updateFriend(FriendModel updatedFriend) async {
@@ -156,5 +208,56 @@ class DatabaseService implements AppDatabase {
       where: 'id = ?',
       whereArgs: [updatedFriend.id],
     );
+    Logger().i('Friend updated locally');
+
+    // Sync to Firebase
+    try {
+      await _firebaseService.updateFriend(updatedFriend);
+    } catch (e) {
+      Logger().w('Failed to sync friend update to Firebase: $e');
+    }
+  }
+
+  // Sync methods
+  Future<void> syncHabitsFromCloud(String userId) async {
+    try {
+      final cloudHabits = await _firebaseService.getHabitsOnce(userId);
+      final db = await database;
+
+      for (final habit in cloudHabits) {
+        await db.insert(
+          'Habits',
+          habit.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      Logger().i('Synced ${cloudHabits.length} habits from cloud');
+    } catch (e) {
+      Logger().e('Error syncing habits from cloud: $e');
+    }
+  }
+
+  Future<void> syncFriendsFromCloud(String userId) async {
+    try {
+      final cloudFriends = await _firebaseService.getFriendsOnce(userId);
+      final db = await database;
+
+      for (final friend in cloudFriends) {
+        await db.insert(
+          'Friends',
+          friend.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      Logger().i('Synced ${cloudFriends.length} friends from cloud');
+    } catch (e) {
+      Logger().e('Error syncing friends from cloud: $e');
+    }
+  }
+
+  Future<void> syncAllData(String userId) async {
+    await syncHabitsFromCloud(userId);
+    await syncFriendsFromCloud(userId);
+    Logger().i('All data synced from cloud');
   }
 }

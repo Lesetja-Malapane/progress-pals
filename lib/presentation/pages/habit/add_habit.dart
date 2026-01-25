@@ -3,13 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
 import 'package:progress_pals/data/datasources/local/database_service.dart';
+import 'package:progress_pals/data/datasources/remote/firebase_service.dart';
 import 'package:progress_pals/data/models/habit_model.dart';
 import 'package:progress_pals/presentation/viewmodels/home_viewmodel.dart';
 import 'package:progress_pals/presentation/widgets/app_button.dart';
 import 'package:provider/provider.dart';
 
 class AddHabitScreen extends StatefulWidget {
-  const AddHabitScreen({super.key});
+  final HabitModel? habit;
+
+  const AddHabitScreen({super.key, this.habit});
 
   @override
   State<AddHabitScreen> createState() => _AddHabitScreenState();
@@ -17,6 +20,7 @@ class AddHabitScreen extends StatefulWidget {
 
 class _AddHabitScreenState extends State<AddHabitScreen> {
   final DatabaseService _databaseService = DatabaseService();
+  final FirebaseService _firebaseService = FirebaseService();
   late TextEditingController _nameController;
   late TextEditingController _descriptionController;
   late TextEditingController _shareWithController;
@@ -32,17 +36,13 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     _shareWithController = TextEditingController();
 
     // Check if we're editing a habit
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final args = ModalRoute.of(context)?.settings.arguments;
-      if (args is HabitModel) {
-        _editingHabit = args;
-        _nameController.text = args.name;
-        _descriptionController.text = args.description;
-        _shareWithController.text = args.sharedWith;
-        _repeatPerWeek = args.repeatPerWeek;
-        setState(() {});
-      }
-    });
+    if (widget.habit != null) {
+      _editingHabit = widget.habit;
+      _nameController.text = widget.habit!.name;
+      _descriptionController.text = widget.habit!.description;
+      _shareWithController.text = widget.habit!.sharedWith;
+      _repeatPerWeek = widget.habit!.repeatPerWeek;
+    }
   }
 
   @override
@@ -97,6 +97,8 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
           sharedWith: _shareWithController.text,
         );
         await _databaseService.insertHabit(habit);
+        await _firebaseService.addHabit(habit);
+        
         Logger().i('Habit created: $habitData');
       }
 
