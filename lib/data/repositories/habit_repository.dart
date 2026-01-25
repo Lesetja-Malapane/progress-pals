@@ -39,14 +39,38 @@ class HabitRepository implements IHabitRepository {
     final habits = await _databaseService.getHabits();
     final habit = habits.firstWhere((h) => h.id == id);
 
+    // Check if we need to reset the count (if last reset was before this week's Monday)
+    final today = DateTime.now();
+    final currentMonday = today.subtract(Duration(days: today.weekday - 1));
+    final lastReset = habit.lastResetDate;
+    final needsReset =
+        lastReset == null ||
+        lastReset.isBefore(
+          DateTime(currentMonday.year, currentMonday.month, currentMonday.day),
+        );
+
+    // Check if habit was already completed today
+    final lastCompleted = habit.lastCompletedDate;
+    final isCompletedToday =
+        lastCompleted != null &&
+        lastCompleted.year == today.year &&
+        lastCompleted.month == today.month &&
+        lastCompleted.day == today.day;
+
+    // Toggle: if completed today, uncomplete it; otherwise complete it
     final updatedHabit = HabitModel(
       id: habit.id,
       userId: habit.userId,
       name: habit.name,
       description: habit.description,
       repeatPerWeek: habit.repeatPerWeek,
-      completedCount: habit.completedCount + 1,
-      lastCompletedDate: DateTime.now(),
+      completedCount: needsReset
+          ? (isCompletedToday ? 0 : 1)
+          : (isCompletedToday
+                ? (habit.completedCount - 1).clamp(0, habit.repeatPerWeek)
+                : habit.completedCount + 1),
+      lastCompletedDate: isCompletedToday ? null : DateTime.now(),
+      lastResetDate: needsReset ? DateTime.now() : habit.lastResetDate,
       sharedWith: habit.sharedWith,
       isSynced: false,
     );

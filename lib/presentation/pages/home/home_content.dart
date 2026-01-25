@@ -159,6 +159,7 @@ class _HomeContentState extends State<HomeContent> {
                     },
                   ),
           ),
+          const SizedBox(height: 80),
         ],
       ),
     );

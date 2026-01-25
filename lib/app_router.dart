@@ -1,9 +1,13 @@
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:progress_pals/data/models/friend_model.dart';
 import 'package:progress_pals/presentation/pages/auth/welcome_page.dart';
 import 'package:progress_pals/presentation/pages/habit/add_habit.dart';
+import 'package:progress_pals/presentation/pages/friends/add_friend.dart';
 import 'package:progress_pals/presentation/pages/home/home_page.dart';
+import 'package:progress_pals/presentation/pages/analytics/friend_analytics_page.dart';
+import 'package:progress_pals/presentation/pages/profile/profile_page.dart';
 
 final appRouter = GoRouter(
   routes: [
@@ -87,9 +91,23 @@ final appRouter = GoRouter(
               builder: (context, state) => const AddHabitScreen(),
             ),
             GoRoute(
+              path: 'add-friend',
+              builder: (context, state) {
+                final friend = state.extra as FriendModel?;
+                return AddFriendScreen(friend: friend);
+              },
+            ),
+            GoRoute(
+              path: 'friend-analytics',
+              builder: (context, state) {
+                final friend = state.extra as FriendModel?;
+                return FriendAnalyticsPage(friend: friend);
+              },
+            ),
+            GoRoute(
               path: 'profile',
               builder: (context, state) {
-                return Placeholder();
+                return const ProfilePage();
               },
             ),
           ],
@@ -98,4 +116,5 @@ final appRouter = GoRouter(
     ),
   ],
 );
+
 // end of GoRouter configuration

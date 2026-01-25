@@ -22,6 +22,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   late TextEditingController _shareWithController;
   int _repeatPerWeek = 1;
   final _formKey = GlobalKey<FormState>();
+  HabitModel? _editingHabit;
 
   @override
   void initState() {
@@ -29,6 +30,19 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
     _nameController = TextEditingController();
     _descriptionController = TextEditingController();
     _shareWithController = TextEditingController();
+
+    // Check if we're editing a habit
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final args = ModalRoute.of(context)?.settings.arguments;
+      if (args is HabitModel) {
+        _editingHabit = args;
+        _nameController.text = args.name;
+        _descriptionController.text = args.description;
+        _shareWithController.text = args.sharedWith;
+        _repeatPerWeek = args.repeatPerWeek;
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -44,7 +58,7 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       final User? currentUser = FirebaseAuth.instance.currentUser;
 
       if (currentUser == null) {
-        print("Error: No user logged in!");
+        Logger().e("Error: No user logged in!");
         return;
       }
 
@@ -55,19 +69,36 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
         'shareWith': _shareWithController.text,
       };
 
-      final HabitModel habit = HabitModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        userId: currentUser.uid,
-        name: _nameController.text,
-        description: _descriptionController.text,
-        repeatPerWeek: _repeatPerWeek,
-        completedCount: 0,
-        sharedWith: _shareWithController.text,
-      );
-
-      await _databaseService.insertHabit(habit);
-
-      Logger().i('Habit data: $habitData');
+      if (_editingHabit != null) {
+        // Update existing habit
+        final updatedHabit = HabitModel(
+          id: _editingHabit!.id,
+          userId: _editingHabit!.userId,
+          name: _nameController.text,
+          description: _descriptionController.text,
+          repeatPerWeek: _repeatPerWeek,
+          completedCount: _editingHabit!.completedCount,
+          lastCompletedDate: _editingHabit!.lastCompletedDate,
+          lastResetDate: _editingHabit!.lastResetDate,
+          sharedWith: _shareWithController.text,
+          isSynced: false,
+        );
+        await _databaseService.updateHabit(updatedHabit);
+        Logger().i('Habit updated: $habitData');
+      } else {
+        // Create new habit
+        final HabitModel habit = HabitModel(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          userId: currentUser.uid,
+          name: _nameController.text,
+          description: _descriptionController.text,
+          repeatPerWeek: _repeatPerWeek,
+          completedCount: 0,
+          sharedWith: _shareWithController.text,
+        );
+        await _databaseService.insertHabit(habit);
+        Logger().i('Habit created: $habitData');
+      }
 
       // Refresh the habits list in HomeViewModel
       if (mounted) {
@@ -91,9 +122,9 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
             Navigator.pop(context);
           },
         ),
-        title: const Text(
-          'Add New Habit',
-          style: TextStyle(
+        title: Text(
+          _editingHabit != null ? 'Edit Habit' : 'Add New Habit',
+          style: const TextStyle(
             color: AppColors.textPrimary,
             fontSize: 20,
             fontWeight: FontWeight.w600,

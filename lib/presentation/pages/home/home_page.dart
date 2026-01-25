@@ -2,6 +2,9 @@ import 'package:dot_navigation_bar/dot_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
 import 'package:progress_pals/presentation/pages/home/home_content.dart';
+import 'package:progress_pals/presentation/pages/friends/friends_page.dart';
+import 'package:progress_pals/presentation/pages/analytics/analytics_page.dart';
+import 'package:progress_pals/presentation/pages/profile/profile_page.dart';
 import 'package:progress_pals/presentation/viewmodels/home_viewmodel.dart';
 import 'package:provider/provider.dart';
 
@@ -9,10 +12,10 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   static final List<Widget> _pages = [
-    HomeContent(),
-    Scaffold(body: const Center(child: Text("Manage Friends"))),
-    Scaffold(body: const Center(child: Text('Analytics'))),
-    Scaffold(body: const Center(child: Text('Profile'))),
+    const HomeContent(),
+    const FriendsPage(),
+    const AnalyticsPage(),
+    const ProfilePage(),
   ];
 
   @override

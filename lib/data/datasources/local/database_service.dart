@@ -1,4 +1,5 @@
 import 'package:logger/web.dart';
+import 'package:progress_pals/data/models/friend_model.dart';
 import 'package:progress_pals/data/models/habit_model.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -20,7 +21,7 @@ class DatabaseService implements AppDatabase {
   Future<Database> initDatabase() async {
     _database = await openDatabase(
       "habits.db",
-      version: 2,
+      version: 4,
       onCreate: (db, version) async {
         await db.execute('''
             CREATE TABLE IF NOT EXISTS Habits (
@@ -31,14 +32,38 @@ class DatabaseService implements AppDatabase {
               repeatPerWeek INTEGER, 
               completedCount INTEGER, 
               lastCompletedDate TEXT, 
+              lastResetDate TEXT,
               sharedWith TEXT,
               isSynced INTEGER
             )
           ''');
+        await db.execute('''
+          CREATE TABLE IF NOT EXISTS Friends (
+            id TEXT PRIMARY KEY,
+            userId TEXT,
+            email TEXT,
+            name TEXT,
+            addedDate TEXT
+          )
+        ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
           await db.execute('ALTER TABLE Habits ADD COLUMN userId TEXT');
+        }
+        if (oldVersion < 3) {
+          await db.execute('ALTER TABLE Habits ADD COLUMN lastResetDate TEXT');
+        }
+        if (oldVersion < 4) {
+          await db.execute('''
+            CREATE TABLE IF NOT EXISTS Friends (
+              id TEXT PRIMARY KEY,
+              userId TEXT,
+              email TEXT,
+              name TEXT,
+              addedDate TEXT
+            )
+          ''');
         }
       },
     );
@@ -91,6 +116,45 @@ class DatabaseService implements AppDatabase {
       {'isSynced': 1},
       where: 'id = ?',
       whereArgs: [id],
+    );
+  }
+
+  // Friend management methods
+  Future<void> insertFriend(FriendModel friend) async {
+    final db = await database;
+    await db.insert(
+      'Friends',
+      friend.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    Logger().i('Friend added: ${friend.name}');
+  }
+
+  Future<List<FriendModel>> getFriends(String userId) async {
+    final db = await database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'Friends',
+      where: 'userId = ?',
+      whereArgs: [userId],
+    );
+    return List.generate(maps.length, (i) {
+      return FriendModel.fromMap(maps[i]);
+    });
+  }
+
+  Future<void> deleteFriend(String friendId) async {
+    final db = await database;
+    await db.delete('Friends', where: 'id = ?', whereArgs: [friendId]);
+    Logger().i('Friend removed');
+  }
+
+  Future<void> updateFriend(FriendModel updatedFriend) async {
+    final db = await database;
+    await db.update(
+      'Friends',
+      updatedFriend.toMap(),
+      where: 'id = ?',
+      whereArgs: [updatedFriend.id],
     );
   }
 }

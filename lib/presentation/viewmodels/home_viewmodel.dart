@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:logger/web.dart';
 import 'package:progress_pals/data/models/habit_model.dart';
 import 'package:progress_pals/data/repositories/habit_repository.dart';
 
@@ -39,7 +40,7 @@ class HomeViewModel extends ChangeNotifier {
     try {
       _habits = await _habitRepository.getHabits();
     } catch (e) {
-      print('Error fetching habits: $e');
+      Logger().e('Error fetching habits: $e');
     }
     _isLoading = false;
     notifyListeners();
@@ -50,7 +51,7 @@ class HomeViewModel extends ChangeNotifier {
       await _habitRepository.completeHabit(habitId);
       await fetchHabits();
     } catch (e) {
-      print('Error completing habit: $e');
+      Logger().e('Error completing habit: $e');
     }
   }
 
@@ -59,7 +60,7 @@ class HomeViewModel extends ChangeNotifier {
       await _habitRepository.deleteHabit(habitId);
       await fetchHabits();
     } catch (e) {
-      print('Error deleting habit: $e');
+      Logger().e('Error deleting habit: $e');
     }
   }
 

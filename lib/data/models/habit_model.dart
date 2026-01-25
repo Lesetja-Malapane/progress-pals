@@ -9,6 +9,7 @@ class HabitModel {
   // TRACKING
   final int completedCount;
   final DateTime? lastCompletedDate;
+  final DateTime? lastResetDate;
 
   // SOCIAL
   // Share with a friend (insert their email here)
@@ -22,6 +23,7 @@ class HabitModel {
     required this.repeatPerWeek,
     required this.completedCount,
     this.lastCompletedDate,
+    this.lastResetDate,
     required this.sharedWith,
     this.isSynced = false,
   });
@@ -36,6 +38,7 @@ class HabitModel {
       'completedCount': completedCount,
       // Store DateTime as ISO string for SQLite
       'lastCompletedDate': lastCompletedDate?.toIso8601String(),
+      'lastResetDate': lastResetDate?.toIso8601String(),
       'sharedWith': sharedWith,
       'isSynced': isSynced ? 1 : 0,
     };
@@ -79,6 +82,9 @@ class HabitModel {
       repeatPerWeek: (map['repeatPerWeek'] as int?) ?? 0,
       completedCount: (map['completedCount'] as int?) ?? 0,
       lastCompletedDate: parsedDate,
+      lastResetDate: map['lastResetDate'] != null
+          ? DateTime.tryParse(toSafeString(map['lastResetDate']))
+          : null,
       sharedWith: toSafeString(map['sharedWith']),
       isSynced: (map['isSynced'] as int?) == 1,
     );
