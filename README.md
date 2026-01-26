@@ -36,3 +36,5 @@ lib/
 └── main.dart
 
 -> Rive for custom navbar
+
+26/01/26 Break day
