@@ -10,7 +10,7 @@ import 'package:progress_pals/presentation/pages/habit/add_habit.dart';
 import 'package:progress_pals/presentation/pages/friends/add_friend.dart';
 import 'package:progress_pals/presentation/pages/home/home_page.dart';
 import 'package:progress_pals/presentation/pages/analytics/friend_analytics_page.dart';
-import 'package:progress_pals/presentation/pages/profile/profile_page_new.dart';
+import 'package:progress_pals/presentation/pages/profile/profile_page.dart';
 
 final appRouter = GoRouter(
   routes: [

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
+import 'package:progress_pals/core/theme/theme_extensions.dart';
 import 'package:progress_pals/data/models/habit_model.dart';
 
 class HabitCard extends StatefulWidget {
@@ -62,10 +63,10 @@ class _HabitCardState extends State<HabitCard> {
                       children: [
                         Text(
                           widget.habit.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: context.themeTextPrimary,
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,

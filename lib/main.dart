@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:progress_pals/core/theme/app_colors.dart';
 import 'package:progress_pals/core/theme/app_theme.dart';
 import 'package:progress_pals/core/theme/theme_provider.dart';
 import 'package:provider/provider.dart';

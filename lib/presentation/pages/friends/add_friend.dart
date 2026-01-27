@@ -1,7 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
+import 'package:progress_pals/core/theme/theme_extensions.dart';
 import 'package:progress_pals/data/datasources/local/database_service.dart';
 import 'package:progress_pals/data/datasources/remote/firebase_service.dart';
 import 'package:progress_pals/data/models/friend_model.dart';
@@ -67,23 +66,6 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
       return;
     }
 
-    // 2. USE THE REAL DATA FOUND
-
-    // final newFriend = FriendModel(
-    //   id: DateTime.now().millisecondsSinceEpoch
-    //       .toString(), // Unique ID for the friendship itself
-    //   userId:
-    //       foundUserData['userId'], // <--- THIS IS THE FIX (The Friend's real UID)
-    //   name: foundUserData['displayName'] ?? 'Unknown',
-    //   email: foundUserData['email'],
-    //   addedDate: DateTime.now()
-    //   // ... any other fields
-    // );
-
-    // 3. SAVE TO YOUR FRIENDS LIST
-    // Note: We pass currentUserId because we are saving this into YOUR subcollection
-
-    // final currentUserId = FirebaseAuth.instance.currentUser!.uid;
     await _databaseService.insertFriend(newFriend);
 
     Navigator.pop(context);
@@ -92,22 +74,22 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.themeBackground,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.themeBackground,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: context.themeTextPrimary),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         title: Text(
           _editingFriend != null ? 'Edit Friend' : 'Add New Friend',
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
+          style: TextStyle(
+            color: context.themeTextPrimary,
+            fontSize: 28,
+            fontWeight: FontWeight.w500,
           ),
         ),
         centerTitle: true,
@@ -185,8 +167,8 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
   Widget _buildFormLabel(String label) {
     return Text(
       label,
-      style: const TextStyle(
-        color: AppColors.textPrimary,
+      style: TextStyle(
+        color: context.themeTextPrimary,
         fontSize: 14,
         fontWeight: FontWeight.w600,
       ),
@@ -206,41 +188,41 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
       validator: validator,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(color: AppColors.textDisabled),
-        prefixIcon: Icon(icon, color: AppColors.primary),
+        hintStyle: TextStyle(color: context.themeTextDisabled),
+        prefixIcon: Icon(icon, color: context.themeTextPrimary),
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: context.themeSurface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.divider, width: 1.5),
+          borderSide: BorderSide(color: context.themeDivider, width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.divider, width: 1.5),
+          borderSide: BorderSide(color: context.themeDivider, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: BorderSide(color: context.themeTextPrimary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+          borderSide: BorderSide(color: context.error, width: 1.5),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error, width: 2),
+          borderSide: BorderSide(color: context.error, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(
+        contentPadding: EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
         ),
-        errorStyle: const TextStyle(
-          color: AppColors.error,
+        errorStyle: TextStyle(
+          color: context.error,
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
       ),
-      style: const TextStyle(color: AppColors.textPrimary, fontSize: 16),
+      style: TextStyle(color: context.themeTextPrimary, fontSize: 16),
     );
   }
 }

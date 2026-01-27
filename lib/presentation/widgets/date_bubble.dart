@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
+import 'package:progress_pals/core/theme/theme_extensions.dart';
 
 class DateBubble extends StatelessWidget {
   final String label;
@@ -18,13 +19,13 @@ class DateBubble extends StatelessWidget {
       height: 38,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: isSelected ? AppColors.primary : AppColors.primaryLight,
+        color: isSelected ? context.themeTextPrimary : context.themeSurfaceMuted,
         shape: BoxShape.circle,
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: isSelected ? AppColors.textPrimary : AppColors.textDisabled,
+          color: isSelected ? context.themeTextDisabled : context.themeTextSecondary,
           fontWeight: FontWeight.bold,
         ),
       ),

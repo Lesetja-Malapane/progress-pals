@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
+import 'package:progress_pals/core/theme/theme_extensions.dart';
 import 'package:progress_pals/data/datasources/local/database_service.dart';
 import 'package:progress_pals/data/datasources/remote/firebase_service.dart';
 import 'package:progress_pals/data/models/habit_model.dart';
@@ -116,22 +117,22 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.themeBackground,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.themeBackground,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          icon: Icon(Icons.arrow_back, color: context.themeTextPrimary),
           onPressed: () {
             Navigator.pop(context);
           },
         ),
         title: Text(
           _editingHabit != null ? 'Edit Habit' : 'Add New Habit',
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
+          style: TextStyle(
+            color: context.themeTextPrimary,
+            fontSize: 28,
+            fontWeight: FontWeight.w500,
           ),
         ),
         centerTitle: true,
@@ -185,8 +186,8 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                 const SizedBox(height: 8),
                 Container(
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    border: Border.all(color: AppColors.divider, width: 1.5),
+                    color: context.themeSurface,
+                    border: Border.all(color: context.themeDivider, width: 1.5),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: const EdgeInsets.symmetric(
@@ -195,15 +196,15 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.repeat, color: AppColors.primary),
+                      Icon(Icons.repeat, color: context.themeTextPrimary),
                       const SizedBox(width: 12),
                       Expanded(
                         child: DropdownButton<int>(
                           value: _repeatPerWeek,
                           isExpanded: true,
                           underline: const SizedBox(),
-                          style: const TextStyle(
-                            color: AppColors.textPrimary,
+                          style: TextStyle(
+                            color: context.themeTextPrimary,
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -272,8 +273,8 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
   Widget _buildFormLabel(String label) {
     return Text(
       label,
-      style: const TextStyle(
-        color: AppColors.textPrimary,
+      style: TextStyle(
+        color: context.themeTextPrimary,
         fontSize: 14,
         fontWeight: FontWeight.w600,
       ),
@@ -295,41 +296,41 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       validator: validator,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(color: AppColors.textDisabled),
-        prefixIcon: Icon(icon, color: AppColors.primary),
+        hintStyle: TextStyle(color: context.themeTextDisabled),
+        prefixIcon: Icon(icon, color: context.themeTextPrimary),
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: context.themeSurface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.divider, width: 1.5),
+          borderSide: BorderSide(color: context.themeDivider, width: 1.5),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.divider, width: 1.5),
+          borderSide: BorderSide(color: context.themeDivider, width: 1.5),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+          borderSide: BorderSide(color: context.themeTextPrimary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+          borderSide: BorderSide(color: context.error, width: 1.5),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.error, width: 2),
+          borderSide: BorderSide(color: context.error, width: 2),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
         ),
-        errorStyle: const TextStyle(
-          color: AppColors.error,
+        errorStyle: TextStyle(
+          color: context.error,
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
       ),
-      style: const TextStyle(color: AppColors.textPrimary, fontSize: 16),
+      style: TextStyle(color: context.themeTextPrimary, fontSize: 16),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
+import 'package:progress_pals/core/theme/theme_extensions.dart';
 import 'package:progress_pals/data/datasources/local/database_service.dart';
 import 'package:progress_pals/data/datasources/remote/firebase_service.dart';
 import 'package:progress_pals/data/models/friend_model.dart';
@@ -87,16 +88,17 @@ class _FriendsPageState extends State<FriendsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.themeBackground,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
+        toolbarHeight: 100,
+        backgroundColor: context.themeBackground,
         elevation: 0,
-        title: const Text(
-          'Manage Friends',
+        title: Text(
+          'Friends',
           style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+            color: context.themeTextPrimary,
+            fontSize: 28,
+            fontWeight: FontWeight.w500,
           ),
         ),
         centerTitle: true,
@@ -121,10 +123,10 @@ class _FriendsPageState extends State<FriendsPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Friends List Section
-              const Text(
+              Text(
                 'Your Friends',
                 style: TextStyle(
-                  color: AppColors.textPrimary,
+                  color: context.themeTextPrimary,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -139,13 +141,13 @@ class _FriendsPageState extends State<FriendsPage> {
                           Icon(
                             Icons.people_outline,
                             size: 64,
-                            color: Colors.grey[400],
+                            color: context.themeTextDisabled,
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'No friends added yet',
                             style: TextStyle(
-                              color: Colors.grey[600],
+                              color: context.themeTextSecondary,
                               fontSize: 16,
                             ),
                           ),
