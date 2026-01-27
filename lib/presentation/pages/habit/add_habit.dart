@@ -130,8 +130,8 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
           _editingHabit != null ? 'Edit Habit' : 'Add New Habit',
           style: const TextStyle(
             color: AppColors.textPrimary,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
+            fontSize: 28,
+            fontWeight: FontWeight.w500,
           ),
         ),
         centerTitle: true,

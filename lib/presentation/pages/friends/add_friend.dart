@@ -1,6 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
 import 'package:progress_pals/data/datasources/local/database_service.dart';
 import 'package:progress_pals/data/datasources/remote/firebase_service.dart';
@@ -67,23 +65,6 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
       return;
     }
 
-    // 2. USE THE REAL DATA FOUND
-
-    // final newFriend = FriendModel(
-    //   id: DateTime.now().millisecondsSinceEpoch
-    //       .toString(), // Unique ID for the friendship itself
-    //   userId:
-    //       foundUserData['userId'], // <--- THIS IS THE FIX (The Friend's real UID)
-    //   name: foundUserData['displayName'] ?? 'Unknown',
-    //   email: foundUserData['email'],
-    //   addedDate: DateTime.now()
-    //   // ... any other fields
-    // );
-
-    // 3. SAVE TO YOUR FRIENDS LIST
-    // Note: We pass currentUserId because we are saving this into YOUR subcollection
-
-    // final currentUserId = FirebaseAuth.instance.currentUser!.uid;
     await _databaseService.insertFriend(newFriend);
 
     Navigator.pop(context);
@@ -106,8 +87,8 @@ class _AddFriendScreenState extends State<AddFriendScreen> {
           _editingFriend != null ? 'Edit Friend' : 'Add New Friend',
           style: const TextStyle(
             color: AppColors.textPrimary,
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
+            fontSize: 28,
+            fontWeight: FontWeight.w500,
           ),
         ),
         centerTitle: true,

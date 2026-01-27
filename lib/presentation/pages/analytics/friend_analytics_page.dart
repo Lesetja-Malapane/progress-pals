@@ -82,7 +82,7 @@ class _FriendAnalyticsPageState extends State<FriendAnalyticsPage> {
     if (widget.friend == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Friend Analytics')),
-        body: const Center(child: Text('No friend data available')),
+        body: const Center(child: Text('No friend data available',)),
       );
     }
 

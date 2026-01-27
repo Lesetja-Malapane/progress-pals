@@ -89,14 +89,15 @@ class _FriendsPageState extends State<FriendsPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        toolbarHeight: 100,
         backgroundColor: AppColors.background,
         elevation: 0,
         title: const Text(
-          'Manage Friends',
+          'Friends',
           style: TextStyle(
             color: AppColors.textPrimary,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+            fontSize: 28,
+            fontWeight: FontWeight.w500,
           ),
         ),
         centerTitle: true,

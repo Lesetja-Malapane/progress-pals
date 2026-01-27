@@ -74,14 +74,15 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        toolbarHeight: 100,
         backgroundColor: AppColors.background,
         elevation: 0,
         title: const Text(
           'Analytics',
           style: TextStyle(
             color: AppColors.textPrimary,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+            fontSize: 28,
+            fontWeight: FontWeight.w500,
           ),
         ),
         centerTitle: true,

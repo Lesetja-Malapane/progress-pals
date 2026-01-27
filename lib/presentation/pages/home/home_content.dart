@@ -31,8 +31,8 @@ class _HomeContentState extends State<HomeContent> {
           "Today",
           style: TextStyle(
             color: Colors.black,
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
+            fontSize: 28,
+            fontWeight: FontWeight.w500,
           ),
         ),
         centerTitle: true,
