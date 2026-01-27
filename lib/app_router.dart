@@ -1,10 +1,10 @@
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:logger/logger.dart';
 import 'package:progress_pals/data/datasources/remote/firebase_service.dart';
 import 'package:progress_pals/data/models/habit_model.dart';
 import 'package:progress_pals/data/models/friend_model.dart';
-import 'package:progress_pals/data/models/user_model.dart';
 import 'package:progress_pals/presentation/pages/auth/welcome_page.dart';
 import 'package:progress_pals/presentation/pages/habit/add_habit.dart';
 import 'package:progress_pals/presentation/pages/friends/add_friend.dart';
@@ -31,7 +31,8 @@ final appRouter = GoRouter(
                   );
                   context.push(uri.toString());
                 })),
-                AuthStateChangeAction(((context, state) {
+
+                AuthStateChangeAction(((context, state) async {
                   final user = switch (state) {
                     SignedIn state => state.user,
                     UserCreated state => state.credential.user,
@@ -40,16 +41,59 @@ final appRouter = GoRouter(
                   if (user == null) {
                     return;
                   }
-                  if (!user.emailVerified) {
-                    user.sendEmailVerification();
-                    const snackBar = SnackBar(
-                      content: Text(
-                        'Please check your email to verify your email address',
-                      ),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+                  // Ask for displayName if not set
+                  if (user.displayName == null || user.displayName!.isEmpty) {
+                    if (context.mounted) {
+                      final displayName = await showDialog<String>(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext dialogContext) {
+                          final controller = TextEditingController();
+                          return AlertDialog(
+                            title: const Text('Complete Your Profile'),
+                            content: TextField(
+                              controller: controller,
+                              decoration: const InputDecoration(
+                                hintText: 'Enter your name',
+                                labelText: 'Display Name',
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(
+                                  dialogContext,
+                                  controller.text,
+                                ),
+                                child: const Text('Continue'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+
+                      if (displayName != null && displayName.isNotEmpty) {
+                        await user.updateDisplayName(displayName);
+                        await user.reload();
+                      }
+                    }
                   }
-                  context.pushReplacement('/home');
+
+                  await FirebaseService().saveUserToFirestore(user);
+
+                  // if (!user.emailVerified) {
+                  //   // user.sendEmailVerification();
+                  //   const snackBar = SnackBar(
+                  //     content: Text(
+                  //       'Please check your email to verify your email address',
+                  //     ),
+                  //   );
+                  //   ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  // }
+
+                  if (context.mounted) {
+                    context.pushReplacement('/home');
+                  }
                 })),
               ],
             );
@@ -104,6 +148,10 @@ final appRouter = GoRouter(
               path: 'friend-analytics',
               builder: (context, state) {
                 final friend = state.extra as FriendModel?;
+                var _logger = Logger();
+                _logger.f(
+                  "Navigating to analytics for friend: ${friend?.name}, ID: ${friend?.id}, userId: ${friend?.userId}",
+                );
                 return FriendAnalyticsPage(friend: friend);
               },
             ),
@@ -117,7 +165,6 @@ final appRouter = GoRouter(
         ),
       ],
     ),
-    
   ],
 );
 

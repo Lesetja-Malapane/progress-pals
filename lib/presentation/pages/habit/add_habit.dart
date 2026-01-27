@@ -40,8 +40,11 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
       _editingHabit = widget.habit;
       _nameController.text = widget.habit!.name;
       _descriptionController.text = widget.habit!.description;
-      _shareWithController.text = widget.habit!.sharedWith[0];
       _repeatPerWeek = widget.habit!.repeatPerWeek;
+
+      if (widget.habit!.sharedWith.isNotEmpty) {
+        _shareWithController.text = widget.habit!.sharedWith.first;
+      }
     }
   }
 
@@ -62,12 +65,12 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
         return;
       }
 
-      final habitData = {
-        'name': _nameController.text,
-        'description': _descriptionController.text,
-        'repeatPerWeek': _repeatPerWeek,
-        'shareWith': _shareWithController.text,
-      };
+      List<String> sharedWithList = [];
+      final emailInput = _shareWithController.text.trim().toLowerCase();
+      
+      if (emailInput.isNotEmpty) {
+        sharedWithList.add(emailInput);
+      }
 
       if (_editingHabit != null) {
         // Update existing habit
@@ -80,11 +83,10 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
           completedCount: _editingHabit!.completedCount,
           lastCompletedDate: _editingHabit!.lastCompletedDate,
           lastResetDate: _editingHabit!.lastResetDate,
-          sharedWith: [ _shareWithController.text.trim().toLowerCase() ],
+          sharedWith: sharedWithList,
           isSynced: false,
         );
         await _databaseService.updateHabit(updatedHabit);
-        Logger().i('Habit updated: $habitData');
       } else {
         // Create new habit
         final HabitModel habit = HabitModel(
@@ -94,19 +96,19 @@ class _AddHabitScreenState extends State<AddHabitScreen> {
           description: _descriptionController.text,
           repeatPerWeek: _repeatPerWeek,
           completedCount: 0,
-          sharedWith: [ _shareWithController.text.trim().toLowerCase() ],
+          sharedWith: sharedWithList,
         );
         await _databaseService.insertHabit(habit);
         await _firebaseService.addHabit(habit);
         
-        Logger().i('Habit created: $habitData');
       }
+
 
       // Refresh the habits list in HomeViewModel
       if (mounted) {
         final homeViewModel = context.read<HomeViewModel>();
         await homeViewModel.fetchHabits();
-        Navigator.pop(context, habitData);
+        Navigator.pop(context);
       }
     }
   }

@@ -24,7 +24,7 @@ class DatabaseService implements AppDatabase {
   Future<Database> initDatabase() async {
     _database = await openDatabase(
       "habits.db",
-      version: 4,
+      version: 5,
       onCreate: (db, version) async {
         await db.execute('''
             CREATE TABLE IF NOT EXISTS Habits (
@@ -68,9 +68,20 @@ class DatabaseService implements AppDatabase {
             )
           ''');
         }
+        if (oldVersion < 5) {
+          // Version 5 upgrade - no schema changes needed
+        }
       },
     );
     return _database!;
+  }
+
+  // Clear all data for a specific user
+  Future<void> clearUserData(String userId) async {
+    final db = await database;
+    await db.delete('Habits', where: 'userId = ?', whereArgs: [userId]);
+    await db.delete('Friends', where: 'userId = ?', whereArgs: [userId]);
+    Logger().i('Cleared data for user: $userId');
   }
 
   @override
@@ -96,9 +107,17 @@ class DatabaseService implements AppDatabase {
     }
   }
 
-  Future<List<HabitModel>> getHabits() async {
+  Future<List<HabitModel>> getHabits({String? userId}) async {
     final db = await database;
-    final List<Map<String, dynamic>> maps = await db.query('Habits');
+    final currentUserId = userId ?? FirebaseAuth.instance.currentUser?.uid;
+
+    if (currentUserId == null) return [];
+
+    final List<Map<String, dynamic>> maps = await db.query(
+      'Habits',
+      where: 'userId = ?',
+      whereArgs: [currentUserId],
+    );
     return List.generate(maps.length, (i) {
       return HabitModel.fromMap(maps[i]);
     });
@@ -141,7 +160,7 @@ class DatabaseService implements AppDatabase {
     if (maps.isNotEmpty) {
       final habit = HabitModel.fromMap(maps.first);
       try {
-        await _firebaseService.deleteHabit(id, habit.userId!);
+        await _firebaseService.deleteHabit(id, habit.userId);
       } catch (e) {
         Logger().w('Failed to sync habit deletion to Firebase: $e');
       }
@@ -170,18 +189,22 @@ class DatabaseService implements AppDatabase {
 
     // Sync to Firebase
     try {
-      await _firebaseService.addFriendToUser(friend.userId!, friend);
+      await _firebaseService.addFriendToUser(friend);
     } catch (e) {
       Logger().w('Failed to sync friend to Firebase: $e');
     }
   }
 
-  Future<List<FriendModel>> getFriends(String userId) async {
+  Future<List<FriendModel>> getFriends({String? userId}) async {
     final db = await database;
+    final currentUserId = userId ?? FirebaseAuth.instance.currentUser?.uid;
+
+    if (currentUserId == null) return [];
+
     final List<Map<String, dynamic>> maps = await db.query(
       'Friends',
       where: 'userId = ?',
-      whereArgs: [userId],
+      whereArgs: [currentUserId],
     );
     return List.generate(maps.length, (i) {
       return FriendModel.fromMap(maps[i]);

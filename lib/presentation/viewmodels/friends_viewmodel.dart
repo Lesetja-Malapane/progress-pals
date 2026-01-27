@@ -42,11 +42,9 @@ class FriendsViewModel extends ChangeNotifier {
 
   Future<void> addFriend(FriendModel friend) async {
     try {
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId != null) {
-        await _firebaseService.addFriendToUser(userId, friend);
+
+        await _firebaseService.addFriendToUser(friend);
         await _loadFriends();
-      }
     } catch (e) {
       Logger().e('Error adding friend: $e');
     }

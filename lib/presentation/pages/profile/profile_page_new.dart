@@ -5,6 +5,7 @@ import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
 import 'package:progress_pals/core/theme/theme_provider.dart';
 import 'package:progress_pals/data/datasources/local/database_service.dart';
+import 'package:progress_pals/data/datasources/remote/firebase_service.dart';
 import 'package:progress_pals/presentation/widgets/app_button.dart';
 import 'package:provider/provider.dart';
 
@@ -49,6 +50,54 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() => _isSyncing = false);
   }
 
+  Future<void> _updateDisplayName() async {
+    final controller = TextEditingController(text: _currentUser?.displayName);
+
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Update Display Name'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(labelText: 'Display Name'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, controller.text),
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (newName != null && newName.isNotEmpty) {
+      try {
+        await FirebaseService().updateUserDisplayName(newName);
+        setState(() {
+          _currentUser = FirebaseAuth.instance.currentUser;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Display name updated!')),
+          );
+        }
+      } catch (e) {
+        Logger().e('Error updating display name: $e');
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        }
+      }
+    }
+  }
+
   Future<void> _logout() async {
     showDialog(
       context: context,
@@ -65,7 +114,15 @@ class _ProfilePageState extends State<ProfilePage> {
               onPressed: () async {
                 Navigator.pop(context);
                 try {
+                  final userId = _currentUser?.uid;
                   await FirebaseAuth.instance.signOut();
+
+                  // Clear local data for this user
+                  if (userId != null && mounted) {
+                    final databaseService = context.read<DatabaseService>();
+                    await databaseService.clearUserData(userId);
+                  }
+
                   if (mounted) {
                     context.pushReplacement('/');
                   }
@@ -139,12 +196,27 @@ class _ProfilePageState extends State<ProfilePage> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
-              Text(
-                _currentUser?.displayName ?? 'User',
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _currentUser?.displayName ?? 'User',
+                    style: const TextStyle(
+                      color: AppColors.textSecondary,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.edit, size: 16),
+                    onPressed: _updateDisplayName,
+                    constraints: const BoxConstraints(
+                      minHeight: 24,
+                      minWidth: 24,
+                    ),
+                    padding: EdgeInsets.zero,
+                  ),
+                ],
               ),
               const SizedBox(height: 32),
 

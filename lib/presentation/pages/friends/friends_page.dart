@@ -32,8 +32,17 @@ class _FriendsPageState extends State<FriendsPage> {
     try {
       final userId = FirebaseAuth.instance.currentUser?.uid;
       if (userId != null) {
-        final friends = await _databaseService.getFriends(userId);
-        setState(() => _friends = friends);
+        var localFriends = await _databaseService.getFriends(userId: userId);
+        setState(() => _friends = localFriends);
+
+        await _databaseService.syncFriendsFromCloud(userId);
+
+        if (mounted) {
+          setState(() {
+            _friends = localFriends;
+            _isLoading = false;
+          });
+        }
       }
     } catch (e) {
       Logger().e('Error loading friends: $e');
@@ -201,7 +210,7 @@ class _FriendsPageState extends State<FriendsPage> {
                               ),
                             ),
                             onTap: () {
-                              Logger().i("View analytics for: ${friend.name}");
+                              Logger().d("View analytics for: ${friend.name}");
                               context.push(
                                 '/home/friend-analytics',
                                 extra: friend,

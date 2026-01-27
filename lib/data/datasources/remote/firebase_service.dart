@@ -17,7 +17,13 @@ class FirebaseService {
           .collection('habits')
           .doc(habit.id);
 
-      await habitRef.set(habit.toMap());
+      // 1. Get the map (which has 'sharedWith' as a String for SQLite)
+      final habitData = habit.toMap();
+
+      // 2. THE FIX: Overwrite it with the actual List for Firestore
+      habitData['sharedWith'] = habit.sharedWith;
+
+      await habitRef.set(habitData);
       _logger.i('Habit added to Firestore: ${habit.name}');
     } catch (e) {
       _logger.e('Error adding habit: $e');
@@ -54,34 +60,21 @@ class FirebaseService {
     }
   }
 
-  Future<List<HabitModel>> getSharedHabits(
-    String friendUserId,
-    String currentUserEmail,
-  ) async {
-    try {
-      final snapshot = await _firestore
-          .collection('users')
-          .doc(friendUserId)
-          .collection('habits')
-          .where('sharedWith', isEqualTo: currentUserEmail)
-          .get();
-      return snapshot.docs
-          .map((doc) => HabitModel.fromMap(doc.data()))
-          .toList();
-    } catch (e) {
-      _logger.e('Error fetching shared habits: $e');
-      return [];
-    }
-  }
-
   Future<void> updateHabit(HabitModel habit) async {
     try {
+      // 1. Get the map
+      final habitData = habit.toMap();
+
+      // 2. THE FIX: Overwrite with List
+      habitData['sharedWith'] = habit.sharedWith;
+
       await _firestore
           .collection('users')
           .doc(habit.userId)
           .collection('habits')
           .doc(habit.id)
-          .update(habit.toMap());
+          .update(habitData);
+
       _logger.i('Habit updated in Firestore: ${habit.name}');
     } catch (e) {
       _logger.e('Error updating habit: $e');
@@ -104,28 +97,13 @@ class FirebaseService {
     }
   }
 
-  // Friends
-  // Future<void> addFriend(FriendModel friend) async {
-  //   try {
-  //     final habitRef = _firestore
-  //         .collection('users')
-  //         .doc(friend.userId)
-  //         .collection('friends')
-  //         .doc(friend.id);
-
-  //     await habitRef.set(friend.toMap());
-  //     _logger.i('Friend added to Firestore: ${friend.name}');
-  //   } catch (e) {
-  //     _logger.e('Error adding friend: $e');
-  //     rethrow;
-  //   }
-  // }
-
   Future<List<FriendModel>> getFriendsOnce(String userId) async {
     try {
       final snapshot = await _firestore
+          .collection("users")
+          .doc(userId)
+          // .where('userId', isEqualTo: userId)
           .collection('friends')
-          .where('userId', isEqualTo: userId)
           .get();
       return snapshot.docs
           .map((doc) => FriendModel.fromMap(doc.data()))
@@ -135,18 +113,6 @@ class FirebaseService {
       return [];
     }
   }
-
-  // Stream<List<FriendModel>> getFriends(String userId) {
-  //   return _firestore
-  //       .collection('friends')
-  //       .where('userId', isEqualTo: userId)
-  //       .snapshots()
-  //       .map((snapshot) {
-  //         return snapshot.docs
-  //             .map((doc) => FriendModel.fromMap(doc.data()))
-  //             .toList();
-  //       });
-  // }
 
   Future<void> updateFriend(FriendModel friend) async {
     try {
@@ -168,39 +134,6 @@ class FirebaseService {
     } catch (e) {
       _logger.e('Error removing friend: $e');
       rethrow;
-    }
-  }
-
-  Future<List<HabitModel>> getSharedHabitsFromFriend(
-    String friendUserId,
-  ) async {
-    try {
-      // 1. Get the email DIRECTLY from the current auth session
-      final user = FirebaseAuth.instance.currentUser;
-
-      if (user == null || user.email == null) {
-        _logger.e('Error: User not logged in or has no email');
-        return [];
-      }
-
-      final myEmail = user.email!; // Use the exact email from Auth
-      _logger.i(friendUserId);
-
-      // 2. Run the query using that exact email
-      final snapshot = await _firestore
-          .collection('users')
-          .doc(friendUserId)
-          .collection('habits')
-          .where('sharedWith', arrayContains: myEmail)
-          .get();
-
-      return snapshot.docs
-          .map((doc) => HabitModel.fromMap(doc.data()))
-          .toList();
-    } catch (e) {
-      // If this prints "permission-denied", double check the database console
-      _logger.e('Error fetching shared habits: $e');
-      return [];
     }
   }
 
@@ -259,16 +192,16 @@ class FirebaseService {
     _logger.i("--- END DEBUG ---");
   }
 
-  // 1. ADD FRIEND (Keep as is, this writes to the sub-collection)
-Future<void> addFriendToUser(String currentUserId, FriendModel friend) async {
-  // Save into: users -> ME -> friends -> NEW_FRIEND
-  await _firestore
-      .collection('users')
-      .doc(currentUserId) 
-      .collection('friends')
-      .doc(friend.userId) // Using their ID as the doc ID prevents duplicates!
-      .set(friend.toMap());
-}
+  Future<void> addFriendToUser(FriendModel friend) async {
+    final currentUserId = FirebaseAuth.instance.currentUser!.uid;
+
+    await _firestore
+        .collection('users')
+        .doc(currentUserId)
+        .collection('friends')
+        .doc(friend.userId)
+        .set(friend.toMap());
+  }
 
   // 2. GET FRIENDS (Fix this to match the Add function)
   Stream<List<FriendModel>> getFriends(String userId) {
@@ -302,10 +235,191 @@ Future<void> addFriendToUser(String currentUserId, FriendModel friend) async {
       final data = doc.data();
       data['userId'] = doc.id; // Ensure the ID is attached
       return data;
-      
     } catch (e) {
       _logger.e('Error searching for user: $e');
       return null;
+    }
+  }
+
+  // NEW: Call this immediately after Login/Sign-up
+  Future<void> saveUserToFirestore(User user) async {
+    try {
+      // Reference to the user's document
+      final userDoc = _firestore.collection('users').doc(user.uid);
+
+      // We use set with SetOptions(merge: true)
+      // This creates the doc if missing, or updates it if it exists
+      // effectively "healing" any missing data like 'email'
+      await userDoc.set({
+        'userId': user.uid,
+        'email': user.email?.toLowerCase(), // CRITICAL for search
+        'displayName': user.displayName ?? 'Unknown',
+        'lastSeen': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      _logger.i('User data synced to Firestore: ${user.email}');
+    } catch (e) {
+      _logger.e('Error saving user to Firestore: $e');
+      // Don't rethrow here, we don't want to block login if this fails
+    }
+  }
+
+  // Update displayName in both Firebase Auth and Firestore
+  Future<void> updateUserDisplayName(String displayName) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        _logger.e('No user logged in');
+        return;
+      }
+
+      // Update in Firebase Auth
+      await user.updateDisplayName(displayName);
+      await user.reload();
+
+      // Update in Firestore
+      await _firestore.collection('users').doc(user.uid).update({
+        'displayName': displayName,
+      });
+
+      _logger.i('Display name updated: $displayName');
+    } catch (e) {
+      _logger.e('Error updating display name: $e');
+      rethrow;
+    }
+  }
+
+  // Future<List<HabitModel>> getSharedHabitsFromFriend(
+  //   String friendUserId,
+  // ) async {
+  //   try {
+  //     final user = FirebaseAuth.instance.currentUser;
+
+  //     if (user == null || user.email == null) {
+  //       _logger.e('Error: User not logged in or has no email');
+  //       return [];
+  //     }
+
+  //     // FIX: Force lowercase.
+  //     // If Auth gives "User@Gmail.com", we must search for "user@gmail.com"
+  //     final myEmail = user.email!.toLowerCase();
+
+  //     _logger.i("Searching for habits shared with: $myEmail");
+
+  //     final snapshot = await _firestore
+  //         .collection('users')
+  //         .doc(friendUserId)
+  //         .collection('habits')
+  //         .where(
+  //           'sharedWith',
+  //           arrayContains: myEmail,
+  //         ) // This fails if DB field is a String
+  //         .get();
+
+  //     return snapshot.docs
+  //         .map((doc) => HabitModel.fromMap(doc.data()))
+  //         .toList();
+  //   } catch (e) {
+  //     _logger.e('Error fetching shared habits: $e');
+  //     return [];
+  //   }
+  // }
+
+  Future<List<HabitModel>> getSharedHabitsFromFriend(
+    String friendUserId,
+  ) async {
+    try {
+      _logger.f("Her We Gooooooooooooo");
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null || user.email == null) {
+        _logger.e('Error: User not logged in or has no email');
+        return [];
+      }
+
+      final myEmail = user.email!.trim().toLowerCase();
+      _logger.i("Looking for habits shared with: $myEmail");
+
+      // STRATEGY: Fetch ALL habits for this friend, then filter manually.
+      // This bypasses the "String vs Array" query crash.
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(friendUserId)
+          .collection('habits')
+          .get(); // <--- Notice: NO .where() filter here!
+
+      _logger.i(
+        "Found ${snapshot.docs.length} total habits for friend. Filtering now...",
+      );
+
+      List<HabitModel> matchingHabits = [];
+      _logger.i(friendUserId);
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final rawSharedWith = data['sharedWith'];
+        _logger.d(rawSharedWith);
+        bool isShared = false;
+
+        // CHECK 1: Is it a List?
+        if (rawSharedWith is List) {
+          // NUCLEAR CLEANUP:
+          // 1. toString() -> ensure it's text
+          // 2. toLowerCase() -> ignore case
+          // 3. trim() -> remove spaces
+          // 4. replaceAll -> remove accidental quotes or brackets saved in the text
+          final cleanedList = rawSharedWith.map((e) {
+            return e
+                .toString()
+                .toLowerCase()
+                .trim()
+                .replaceAll("'", "") // Remove single quotes
+                .replaceAll('"', "") // Remove double quotes
+                .replaceAll("[", "") // Remove open bracket
+                .replaceAll("]", ""); // Remove close bracket
+          }).toList();
+
+          _logger.f(
+            "Checking: '$myEmail' vs Cleaned List: $cleanedList",
+          ); // Debug print
+
+          // if (cleanedList.contains(myEmail)) {
+          //   isShared = true;
+          // }
+
+          for (final item in cleanedList) {
+            _logger.d("Comparing item: '$item' with '$myEmail'");
+            if (item == myEmail) {
+              isShared = true;
+              break;
+            }
+          }
+        }
+        // CHECK 2: Is it a String? (Legacy support)
+        else if (rawSharedWith is String) {
+          // Same cleanup for string mode
+          final cleanString = rawSharedWith
+              .toLowerCase()
+              .trim()
+              .replaceAll("'", "")
+              .replaceAll('"', "");
+
+          if (cleanString.contains(myEmail)) {
+            isShared = true;
+          }
+        }
+
+        if (isShared) {
+          matchingHabits.add(HabitModel.fromMap(data));
+        }
+      }
+
+      _logger.i(
+        "Final Result: ${matchingHabits.length} habits shared with me.",
+      );
+      return matchingHabits;
+    } catch (e) {
+      _logger.e('Error fetching shared habits: $e');
+      return [];
     }
   }
 }
