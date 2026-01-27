@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
+import 'package:progress_pals/core/theme/theme_extensions.dart';
 import 'package:progress_pals/data/datasources/local/database_service.dart';
 import 'package:progress_pals/data/models/habit_model.dart';
 
@@ -72,15 +73,15 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.themeBackground,
       appBar: AppBar(
         toolbarHeight: 100,
-        backgroundColor: AppColors.background,
+        backgroundColor: context.themeBackground,
         elevation: 0,
-        title: const Text(
+        title: Text(
           'Analytics',
           style: TextStyle(
-            color: AppColors.textPrimary,
+            color: context.themeTextPrimary,
             fontSize: 28,
             fontWeight: FontWeight.w500,
           ),
@@ -98,17 +99,23 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                   Icon(
                     Icons.analytics_outlined,
                     size: 64,
-                    color: Colors.grey[400],
+                    color: context.themeTextPrimary,
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'No analytics yet',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                    style: TextStyle(
+                      color: context.themeTextSecondary,
+                      fontSize: 16,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'Create habits to see analytics',
-                    style: TextStyle(color: Colors.grey[500], fontSize: 14),
+                    style: TextStyle(
+                      color: context.themeTextSecondary,
+                      fontSize: 14,
+                    ),
                   ),
                 ],
               ),
@@ -123,7 +130,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                     _buildStatCard(
                       'Weekly Completion',
                       '${_getCompletionPercentage()}%',
-                      AppColors.primary,
+                      context.themeTextPrimary,
                       Icons.trending_up,
                     ),
                     const SizedBox(height: 16),
@@ -135,13 +142,13 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                       Colors.green,
                       Icons.check_circle,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
 
                     // Best Habit This Week
-                    const Text(
+                    Text(
                       'Best Habit This Week',
                       style: TextStyle(
-                        color: AppColors.textPrimary,
+                        color: context.themeTextPrimary,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -150,13 +157,13 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                     _getBestHabitThisWeek() != null
                         ? _buildHabitCard(_getBestHabitThisWeek()!)
                         : const SizedBox.shrink(),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
 
                     // All Habits Summary
-                    const Text(
+                    Text(
                       'All Habits',
                       style: TextStyle(
-                        color: AppColors.textPrimary,
+                        color: context.themeTextPrimary,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
@@ -171,19 +178,20 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                         )
                         .toList(),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
 
                     // Completion Frequency Chart
-                    const Text(
+                    Text(
                       'Completion Frequency',
                       style: TextStyle(
-                        color: AppColors.textPrimary,
+                        color: context.themeTextPrimary,
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 12),
                     _buildFrequencyChart(),
+
                   ],
                 ),
               ),
@@ -228,8 +236,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
+                    style: TextStyle(
+                      color: context.themeTextSecondary,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -238,7 +246,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                   Text(
                     value,
                     style: TextStyle(
-                      color: AppColors.textPrimary,
+                      color: context.themeTextPrimary,
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                     ),
@@ -262,8 +270,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              AppColors.primary.withValues(alpha: 0.1),
-              AppColors.primary.withValues(alpha: 0.05),
+              context.themeTextPrimary.withValues(alpha: 0.1),
+              context.themeTextPrimary.withValues(alpha: 0.05),
             ],
           ),
         ),
@@ -275,10 +283,10 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.2),
+                    color: context.themeTextPrimary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.star, color: AppColors.primary),
+                  child: Icon(Icons.star, color: context.themeTextPrimary),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -287,18 +295,18 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                     children: [
                       Text(
                         habit.name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: context.themeTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '${habit.completedCount}/${habit.repeatPerWeek} completions',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.textSecondary,
+                          color: context.themeTextSecondary,
                         ),
                       ),
                     ],
@@ -329,20 +337,20 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                 Expanded(
                   child: Text(
                     habit.name,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: context.themeTextPrimary,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Text(
                   '${habit.completedCount}/${habit.repeatPerWeek}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
+                    color: context.themeTextPrimary,
                   ),
                 ),
               ],
@@ -353,9 +361,11 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 6,
-                backgroundColor: AppColors.primary.withValues(alpha: 0.2),
+                backgroundColor: context.themeTextPrimary.withValues(
+                  alpha: 0.2,
+                ),
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  progress >= 1.0 ? Colors.green : AppColors.primary,
+                  progress >= 1.0 ? Colors.green : context.themeTextPrimary,
                 ),
               ),
             ),
@@ -368,11 +378,16 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   Widget _buildFrequencyChart() {
     final frequency = _getCompletionFrequency();
     if (frequency.isEmpty) {
-      return Center(
-        child: Text(
-          'No completion data yet',
-          style: TextStyle(color: Colors.grey[600]),
-        ),
+      return Column(
+        children: [
+          const SizedBox(height: 12),
+          Center(
+            child: Text(
+              'No completion data yet',
+              style: TextStyle(color: context.themeTextSecondary),
+            ),
+          ),
+        ],
       );
     }
 
@@ -403,7 +418,7 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                       child: LinearProgressIndicator(
                         value: percentage / 100,
                         minHeight: 24,
-                        backgroundColor: AppColors.primary.withValues(
+                        backgroundColor: context.themeTextPrimary.withValues(
                           alpha: 0.1,
                         ),
                         valueColor: AlwaysStoppedAnimation<Color>(

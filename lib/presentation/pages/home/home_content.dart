@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/web.dart';
 import 'package:progress_pals/core/theme/app_colors.dart';
+import 'package:progress_pals/core/theme/theme_extensions.dart';
 import 'package:progress_pals/presentation/viewmodels/home_viewmodel.dart';
 import 'package:progress_pals/presentation/widgets/date_bubble.dart';
 import 'package:progress_pals/presentation/widgets/habit_card.dart';
@@ -25,19 +26,20 @@ class _HomeContentState extends State<HomeContent> {
     final viewModel = Provider.of<HomeViewModel>(context);
 
     return Scaffold(
+      backgroundColor: context.themeBackground,
       appBar: AppBar(
         toolbarHeight: 100,
-        title: const Text(
+        title: Text(
           "Today",
           style: TextStyle(
-            color: Colors.black,
+            color: context.themeTextPrimary,
             fontSize: 28,
             fontWeight: FontWeight.w500,
           ),
         ),
         centerTitle: true,
         automaticallyImplyLeading: false,
-        backgroundColor: AppColors.background,
+        backgroundColor: context.themeBackground,
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.add),
@@ -90,7 +92,7 @@ class _HomeContentState extends State<HomeContent> {
                           'Create one to get started!',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[500],
+                            color: context.themeTextSecondary,
                           ),
                         ),
                       ],

@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logger/web.dart';
-import 'package:progress_pals/core/theme/app_colors.dart';
+import 'package:progress_pals/core/theme/theme_extensions.dart';
 import 'package:progress_pals/core/theme/theme_provider.dart';
 import 'package:progress_pals/data/datasources/local/database_service.dart';
 import 'package:progress_pals/data/datasources/remote/firebase_service.dart';
@@ -130,7 +130,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   Logger().e('Error logging out: $e');
                 }
               },
-              child: const Text('Logout', style: TextStyle(color: Colors.red)),
+              child: Text('Logout', style: TextStyle(color: context.error)),
             ),
           ],
         );
@@ -141,7 +141,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.themeBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -154,7 +154,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   width: 100,
                   height: 100,
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: context.themeTextPrimary,
                     shape: BoxShape.circle,
                   ),
                   child: Center(
@@ -162,10 +162,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       _currentUser?.displayName?.isNotEmpty == true
                           ? _currentUser!.displayName![0].toUpperCase()
                           : _currentUser?.email?[0].toUpperCase() ?? 'U',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 48,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color:context.themeTextPrimary,
                       ),
                     ),
                   ),
@@ -175,8 +175,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 // User Email
                 Text(
                   _currentUser?.email ?? 'No email',
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: context.themeTextPrimary,
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
@@ -188,8 +188,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     Text(
                       _currentUser?.displayName ?? 'User',
-                      style: const TextStyle(
-                        color: AppColors.textSecondary,
+                      style: TextStyle(
+                        color: context.themeTextSecondary,
                         fontSize: 14,
                       ),
                     ),
@@ -212,17 +212,17 @@ class _ProfilePageState extends State<ProfilePage> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: context.themeSurface,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.divider, width: 1.5),
+                    border: Border.all(color: context.themeDivider, width: 1.5),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                       Text(
                         'Account Information',
                         style: TextStyle(
-                          color: AppColors.textPrimary,
+                          color: context.themeTextPrimary,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -250,17 +250,17 @@ class _ProfilePageState extends State<ProfilePage> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: context.themeSurface,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.divider, width: 1.5),
+                    border: Border.all(color: context.themeDivider, width: 1.5),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Preferences',
                         style: TextStyle(
-                          color: AppColors.textPrimary,
+                          color: context.themeTextPrimary,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -269,10 +269,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             'Dark Mode',
                             style: TextStyle(
-                              color: AppColors.textPrimary,
+                              color: context.themeTextPrimary,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
@@ -286,7 +286,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     value ? ThemeMode.dark : ThemeMode.light,
                                   );
                                 },
-                                activeThumbColor: AppColors.primary,
+                                activeThumbColor: context.themeTextPrimary,
                               );
                             },
                           ),
@@ -317,7 +317,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 // Version Info
                 Text(
                   'Version 1.0.0',
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                  style: TextStyle(color: context.themeTextSecondary, fontSize: 12),
                 ),
         
                 const SizedBox(height: 120),
@@ -335,14 +335,14 @@ class _ProfilePageState extends State<ProfilePage> {
       children: [
         Text(
           label,
-          style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+          style: TextStyle(color: context.themeTextSecondary, fontSize: 13),
         ),
         Expanded(
           child: Text(
             value,
             textAlign: TextAlign.end,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
+            style: TextStyle(
+              color: context.themeTextPrimary,
               fontSize: 13,
               fontWeight: FontWeight.w500,
             ),
